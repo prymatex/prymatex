@@ -28,7 +28,7 @@ class ProjectsDock(PrymatexDock, Ui_ProjectsDock, ProjectsDockActionsMixin, QtWi
     @ConfigurableHook("code_editor.default_theme")
     def default_theme(self, theme_uuid):
         if theme_uuid:
-            theme = self.application().supportManager.getBundleItem(theme_uuid)
+            theme = self.application().supportManager.getThemeNode(theme_uuid)
             if theme is not None:
                 palette = self.application().supportManager.getThemePalette(theme.bundleItem())
                 self.treeViewProjects.setPalette(palette)

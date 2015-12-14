@@ -139,7 +139,7 @@ class Theme(BundleItem):
     def createThemeStyle(self, settings):
         if 'name' not in settings or not settings['name']:
             settings['name'] = 'untitled'
-        style = self.manager.addThemeStyle(ThemeStyle(self))
+        style = self.manager.onThemeStyleAdded(ThemeStyle(self))
         style.load(settings)
         return style
 

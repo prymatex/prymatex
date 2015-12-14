@@ -52,7 +52,7 @@ class PrymatexMainWindow(PrymatexComponentWidget, MainWindowActionsMixin, QtWidg
 
     @ConfigurableHook("code_editor.default_theme")
     def defaultTheme(self, theme_uuid):
-        theme = self.application().supportManager.getBundleItem(theme_uuid)
+        theme = self.application().supportManager.getThemeNode(theme_uuid)
         if theme is not None:
             palette = self.application().supportManager.getThemePalette(theme.bundleItem())
             self.notifier.setPalette(palette)

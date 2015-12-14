@@ -47,14 +47,14 @@ class BundleItemMenuGroup(QtCore.QObject):
         for bundle, bundleMenu in iter(sorted(iter(self.menus.items()), key=lambda bundle_bundleMenu: bundle_bundleMenu[1].title().replace("&","").lower())):
             menu.addMenu(bundleMenu)
 
-    def buildMenu(self, items, menu, submenus, parent = None):
-        for uuid in items:
+    def buildMenu(self, uuids, menu, submenus, parent = None):
+        for uuid in uuids:
             if uuid.startswith('-'):
                 menu.addSeparator()
                 continue
-            item = self.manager.getBundleItem(uuid)
-            if item is not None:
-                action = item.triggerItemAction(parent)
+            node = self.manager.getBundleItemNode(uuid)
+            if node is not None:
+                action = node.triggerItemAction(parent)
                 menu.addAction(action)
             elif uuid in submenus:
                 submenu = QtWidgets.QMenu(submenus[uuid]['name'], parent)
@@ -125,9 +125,9 @@ class BundleItemMenuGroup(QtCore.QObject):
         if id(bundle.bundleItem().mainMenu) != menu.ID:
             # TODO Ver si no tengo que desconectar las señales de los submenues
             menu.clear()
-            submenus = bundle.bundleItem().mainMenu['submenus'] if bundle.bundleItem().mainMenu is not None and 'submenus' in bundle.bundleItem().mainMenu else {}
-            items = bundle.bundleItem().mainMenu['items'] if 'items' in bundle.bundleItem().mainMenu else []
-            self.buildMenu(items, menu, submenus, menu)
+            self.buildMenu(
+                bundle.bundleItem().mainMenu.get('items', []), menu,
+                bundle.bundleItem().mainMenu.get('submenus', {}), menu)
             menu.ID = id(bundle.bundleItem().mainMenu)
 
     def on_manager_bundleAdded(self, bundle):
@@ -138,9 +138,9 @@ class BundleItemMenuGroup(QtCore.QObject):
         menu = self.menus[bundle.uuid()]
         menu.clear()
         if bundle.bundleItem().mainMenu is not None:
-            submenus = bundle.bundleItem().mainMenu['submenus'] if 'submenus' in bundle.bundleItem().mainMenu else {}
-            items = bundle.bundleItem().mainMenu['items'] if 'items' in bundle.bundleItem().mainMenu else []
-            self.buildMenu(items, menu, submenus, menu)
+            self.buildMenu(
+                bundle.bundleItem().mainMenu.get('items', []), menu,
+                bundle.bundleItem().mainMenu.get('submenus', {}), menu)
 
     def on_manager_bundleRemoved(self, bundle):
         self.removeFromContainers(self.menus[bundle.uuid()])
@@ -403,18 +403,18 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         if isinstance(uuid, uuidmodule.UUID):
             uuid = self.uuidtotext(uuid)
         if not self.isDeleted(uuid):
-            return self._managed_objects.get(uuid)
+            indexes = self.bundleTreeModel.match(self.bundleTreeModel.index(0, 0, QtCore.QModelIndex()), 
+                QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive)
+            if indexes:
+                return self.bundleTreeModel.node(indexes[0])
 
     #---------------------------------------------------
     # BUNDLE OVERRIDE INTERFACE 
     #---------------------------------------------------
-    def getBundle(self, uuid):
-        indexes = self.bundleTreeModel.match(self.bundleTreeModel.index(0, 0, QtCore.QModelIndex()), 
-            QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive)
-        if indexes:
-            return self.bundleTreeModel.node(indexes[0])
+    def getBundleNode(self, uuid):
+        return self.getManagedObjectNode(uuid)
 
-    def addBundle(self, bundle):
+    def onBundleAdded(self, bundle):
         bundle_node = BundleItemTreeNode(bundle)
         icon = self.resources().get_icon("bundle-item-%s" % bundle.type())
         bundle_node.setIcon(icon)
@@ -432,25 +432,22 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return self.bundleProxyModel.nodes()
     
     def getDefaultBundle(self):
-        return self.getBundle(self.defaultBundleForNewBundleItems)
+        return self.getBundleNode(self.defaultBundleForNewBundleItems)
     
     def populatedBundle(self, bundle):
-        bundle_node = self.getBundle(bundle.uuid)
+        bundle_node = self.getBundleNode(bundle.uuid)
         if bundle_node is not None:
             self.bundlePopulated.emit(bundle_node)
         
     #---------------------------------------------------
     # BUNDLEITEM OVERRIDE INTERFACE 
     #---------------------------------------------------
-    def getBundleItem(self, uuid):
-        indexes = self.bundleTreeModel.match(self.bundleTreeModel.index(0, 0, QtCore.QModelIndex()),
-            QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive)
-        if indexes:
-            return self.bundleTreeModel.node(indexes[0])
+    def getBundleItemNode(self, uuid):
+        return self.getManagedObjectNode(uuid)
 
-    def addBundleItem(self, bundle_item):
+    def onBundleItemAdded(self, bundle_item):
         bundle_item_node = BundleItemTreeNode(bundle_item)
-        bundle_node = self.getBundle(bundle_item.bundle.uuid)
+        bundle_node = self.getBundleNode(bundle_item.bundle.uuid)
         icon = self.resources().get_icon("bundle-item-%s" % bundle_item.type())
         bundle_item_node.setIcon(icon)
         self.bundleTreeModel.appendBundleItem(bundle_item_node, bundle_node)
@@ -470,7 +467,10 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
                 nodes.append(node)
         return nodes
 
-        # ----------------- THEME OVERRIDE INTERFACE
+    # ----------------- THEME OVERRIDE INTERFACE
+    def getThemeNode(self, uuid):
+        return self.getManagedObjectNode(uuid)
+
     def getThemePalette(self, theme, scope=None):
         settings = self.getThemeSettings(theme, scope)
         palette = self.application().palette()
@@ -555,13 +555,13 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     #---------------------------------------------------
     # THEME STYLE OVERRIDE INTERFACE
     #---------------------------------------------------
-    def getThemeStyle(self, uuid):
+    def getThemeStyleNode(self, uuid):
         indexes = self.themeStylesTableModel.match(self.bundleTreeModel.index(0, 0, QtCore.QModelIndex()),
             QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive)
         if indexes:
             return self.themeStylesTableModel.style(indexes[0])
 
-    def addThemeStyle(self, style):
+    def onThemeStyleAdded(self, style):
         theme_style = ThemeStyleTableRow(style)
         self.themeStylesTableModel.appendStyle(theme_style)
         return style
@@ -608,43 +608,17 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     # KEYEQUIVALENT OVERRIDE INTERFACE
     #---------------------------------------------------
     def getAllKeyEquivalentItemsNodes(self):
-        memoizedKey = ("getAllKeyEquivalentItems", None, None, None)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache[memoizedKey]
-        keyCode = []
-        for item in self.actionItemsProxyModel.nodes():
-            if item.keyCode() is not None:
-                keyCode.append(item)
-        for item in self.syntaxProxyModel.nodes():
-            if item.keyCode() is not None:
-                keyCode.append(item)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            keyCode)
+        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllKeyEquivalentItems() ]
         
-    def getAllBundleItemsNodesByKeyEquivalent(self, keyCode):
-        memoizedKey = ("getAllBundleItemsByKeyEquivalent", "%s" % keyCode, None, None)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        items = []
-        for item in self.actionItemsProxyModel.nodes():
-            if item.keyCode() == keyCode:
-                items.append(item)
-        for syntax in self.syntaxProxyModel.nodes():
-            if syntax.keyCode() == keyCode:
-                items.append(syntax)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            items)
+    def getAllBundleItemsNodesByKeyEquivalent(self, key_equivalent):
+        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllBundleItemsByKeyEquivalent(key_equivalent) ]
     
     #----------- FILE EXTENSION NODE INTERFACE
     def getAllBundleItemsNodesByFileExtension(self, path):
-        items = []
-        for item in self.dragcommandProxyModel.nodes():
-            if any([fnmatch.fnmatch(path, "*.%s" % extension) for extension in item.draggedFileExtensions]):
-                items.append(item)
-        return items
+        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllBundleItemsByFileExtension(path) ]
     
     def getFileExtensionItemsNodes(self, path, scope):
-        return self.__filter_items(self.getAllBundleItemsByFileExtension(path), scope)
+        return self.__filter_items(self.getAllBundleItemsNodesByFileExtension(path), scope)
 
     #---------------------------------------------------
     # ACTION ITEMS INTERFACE

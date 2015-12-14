@@ -34,7 +34,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         
         theme_uuid = self.settings().get('default_theme')
         if theme_uuid is not None:
-            default_theme = self.application().supportManager.getBundleItem(theme_uuid)
+            default_theme = self.application().supportManager.getThemeNode(theme_uuid)
             if default_theme is not None:
                 self.updateUi(default_theme)
         

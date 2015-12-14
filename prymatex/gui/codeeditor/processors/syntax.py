@@ -19,9 +19,8 @@ class CodeEditorSyntaxProcessor(CodeEditorBaseProcessor, SyntaxProcessorMixin):
         self.stack = []
         self.scope = None
         self.stacks = {}
-        node = self.editor.application().supportManager.getBundleItem(self.editor.default_syntax)
-        print(node)
-        self.setScopeName(node and node.bundleItem().scopeName or "")
+        syntax = self.editor.application().supportManager.getBundleItem(self.editor.default_syntax)
+        self.setScopeName(syntax and syntax.scopeName or "")
     
     def setScopeName(self, name):
         self.scope_name = name

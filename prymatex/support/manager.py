@@ -250,7 +250,7 @@ class SupportBaseManager(object):
         if bundle is None:
             bundle = Bundle(uuid, self)
             bundle.load(data)
-            self.addBundle(bundle)
+            self.onBundleAdded(bundle)
             self.addManagedObject(bundle)
         else:
             bundle.load(data)
@@ -278,7 +278,7 @@ class SupportBaseManager(object):
         if bundleItem is None:
             bundleItem = klass(uuid, self, bundle)
             bundleItem.load(data)
-            self.addBundleItem(bundleItem)
+            self.onBundleItemAdded(bundleItem)
             for staticPath in klass.staticFilePaths(source.path):
                 # TODO: Ver que hacer con directorios
                 staticFile = StaticFile(staticPath, bundleItem)
@@ -505,10 +505,10 @@ class SupportBaseManager(object):
             self.logger().debug("Add source '%s' in %s for object." % (name, obj_source.path))
         
     # ------------- BUNDLE INTERFACE
-    def getBundleItem(self, uuid):
+    def getBundle(self, uuid):
         return self.getManagedObject(uuid)
 
-    def addBundle(self, bundle):
+    def onBundleAdded(self, bundle):
         pass
 
     def modifyBundle(self, bundle):
@@ -555,7 +555,7 @@ class SupportBaseManager(object):
         bundle.addSource(bundle_source)
         self.saveManagedObject(bundle, bundle_source)
         
-        self.addBundle(bundle)
+        self.onBundleAdded(bundle)
         self.addManagedObject(bundle)
         return bundle
 
@@ -629,14 +629,14 @@ class SupportBaseManager(object):
     def getBundleItem(self, uuid):
         return self.getManagedObject(uuid)
 
-    def addBundleItem(self, bundleItem):
-        pass
+    def onBundleItemAdded(self, bundle_item):
+        raise NotImplemented
 
-    def modifyBundleItem(self, bundleItem):
-        pass
+    def modifyBundleItem(self, bundle_item):
+        raise NotImplemented
 
-    def removeBundleItem(self, bundleItem):
-        pass
+    def removeBundleItem(self, bundle_item):
+        raise NotImplemented
 
     def getAllBundleItems(self):
         return []
@@ -644,7 +644,7 @@ class SupportBaseManager(object):
     # -------------- BUNDLEITEM CRUD
     def findBundleItems(self, **attrs):
         """
-        Retorna todos los items que complan las condiciones en attrs
+        Retorna todos los items que cumplan las condiciones en attrs
         """
         bundleItems = []
         for bundleItem in self.getAllBundleItems():
@@ -679,7 +679,7 @@ class SupportBaseManager(object):
         bundleItem.addSource(item_source)
         self.saveManagedObject(bundleItem, item_source)
         
-        self.addBundleItem(bundleItem)
+        self.onBundleItemAdded(bundleItem)
         self.addManagedObject(bundleItem)
         return bundleItem
 
@@ -739,8 +739,8 @@ class SupportBaseManager(object):
     def getTheme(self, uuid):
         return self.getManagedObject(uuid)
 
-    def addTheme(self, theme):
-        return style
+    def onThemeAdded(self, theme):
+        pass
 
     def removeTheme(self, theme):
         pass
@@ -811,8 +811,8 @@ class SupportBaseManager(object):
     def getThemeStyle(self, uuid):
         return self.getManagedObject(uuid)
 
-    def addThemeStyle(self, style):
-        return style
+    def onThemeStyleAdded(self, style):
+        pass
 
     def removeThemeStyle(self, style):
         pass
@@ -1004,9 +1004,7 @@ class SupportBaseManager(object):
 
     # -------------- KEYEQUIVALENT INTERFACE
     def getAllKeyEquivalentItems(self):
-        """
-        Return a list of all key equivalent items
-        """
+        """Return a list of all key equivalent items"""
         actions = self.getAllActionItems()
         keyEquivalents = []
         for item in actions:
@@ -1018,11 +1016,11 @@ class SupportBaseManager(object):
                 keyEquivalents.append(item)
         return keyEquivalents
 
-    def getAllBundleItemsByKeyEquivalent(self, keyEquivalent):
+    def getAllBundleItemsByKeyEquivalent(self, key_equivalent):
         """Return a list of key equivalent bundle items"""
         items = []
         for item in self.getAllKeyEquivalentItems():
-            if item.keyEquivalent == keyEquivalent:
+            if item.keyEquivalent == key_equivalent:
                 items.append(item)
         return items
 
