@@ -36,7 +36,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         character = event.text()
         if any((pair for pair in settings.smartTypingPairs if character in pair)):
             yield self.__insert_typing_pairs
-        
+
         #if event.text():
         #    self.editor.runCommand("insert", characters=event.text())
         
@@ -167,21 +167,21 @@ class CodeEditorEditMode(CodeEditorBaseMode):
             # Suggestions
             words = self.editor.extractCompletions(alreadyTyped)
             words += self.editor.currentPreferenceSettings().completions
-            nodes = self.editor.application().supportManager.getAllTabTriggerItemsNodesByScope(leftScope, rightScope)
-            triggers = {node.bundleItem().tabTrigger: node for node in nodes if node.bundleItem().tabTrigger.startswith(alreadyTyped)}
+            items = self.editor.application().supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
+            triggers = {item.tabTrigger: item for item in items if item.tabTrigger.startswith(alreadyTyped)}
             suggestions = sorted(set(words + list(triggers.keys())))
             def suggestions_generator(suggestions, words, triggers):
                 def _generator():
                     for suggestion in suggestions:
                         # Is bundle item
                         if suggestion in triggers:
-                            node = triggers[suggestion]
+                            item = triggers[suggestion]
                             yield {
-                                "icon": node.icon(), 
+                                "icon": self.editor.resources().get_icon("bundle-item-%s" % item.type()),
                                 "match": suggestion,
-                                "tool_tip": "%s - %s" % (node.nodeName(), node.bundleItem().bundle.name),
-                                "display": "%s(%s)" % (suggestion, node.nodeName()),
-                                "item": node.bundleItem()
+                                "tool_tip": "%s - %s" % (item.name, item.bundle.name),
+                                "display": "%s(%s)" % (suggestion, item.name),
+                                "item": item
                             }
                         if suggestion in words:
                             yield ("%s" % suggestion, suggestion)

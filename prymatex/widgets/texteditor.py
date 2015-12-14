@@ -12,7 +12,6 @@ from prymatex.qt import API
 from prymatex.qt.extensions import HtmlItemDelegate
 from prymatex.utils import text
 from prymatex.core import config
-from prymatex import resources
 from prymatex.utils import text as textutils
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
@@ -62,9 +61,6 @@ class CompletionWidget(QtWidgets.QListWidget):
             item = QtWidgets.QListWidgetItem(txt, self)
             item.setData(QtCore.Qt.MatchRole, mt)
             if ico is not None:
-                if not isinstance(ico, QtGui.QIcon):
-                    # TODO Obtener el icono del lugar correcto
-                    ico = resources.get_icon(ico)
                 item.setIcon(ico)
             if tip is not None:
                 item.setToolTip(tip)

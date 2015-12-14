@@ -909,12 +909,14 @@ class SupportBaseManager(object):
                 if length > best[1]:
                     best = (trigger, length)
             return best[0]
-
+    
+    @memoize
     def getAllTabTriggerItemsByScope(self, leftScope, rightScope=None):
         return self.__filter_items(self.getAllTabTriggerItems(), leftScope, rightScope)
 
-    def getTabTriggerItem(self, tabTrigger, leftScope, rightScope):
-        return self.__filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), leftScope, rightScope)
+    @memoize
+    def getTabTriggerItem(self, tab_trigger, leftScope, rightScope):
+        return self.__filter_items(self.getAllBundleItemsByTabTrigger(tab_trigger), leftScope, rightScope)
 
     # -------------- KEYEQUIVALENT INTERFACE
     def getAllKeyEquivalentItems(self):
