@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+import functools
 import shelve
 
 class cacheable(object):
@@ -9,22 +10,22 @@ class cacheable(object):
     def __init__(self, stamp_function=lambda *largs, **kwargs: 0):
         self.stamp_function = stamp_function
             
-    def __call__(self, f):
-        full_func_name = f.__module__ + '.' + f.__name__
+    def __call__(self, func):
+        full_func_name = func.__module__ + '.' + func.__name__
+        @functools.wraps(func)
         def wrapped(*largs, **kwargs):
             if self.flashback is None:
-                return f(*largs, **kwargs)
-            key = str((full_func_name, ) + largs + tuple(kwargs.items()))
+                return func(*largs, **kwargs)
+            key = full_func_name + str(largs) + str(kwargs)
             if key in self.flashback:
                 value = self.flashback[key]
                 if value[0] == self.stamp_function(*largs, **kwargs):
                     return value[1]
-            retval = f(*largs, **kwargs)
+            retval = func(*largs, **kwargs)
             self.flashback[key] = (self.stamp_function(*largs, **kwargs), retval)
             return retval
-        wrapped.__name__ = f.__name__
         return wrapped
-    
+
     @classmethod
     def init_cache(cls, path):
         if cls.flashback is None:

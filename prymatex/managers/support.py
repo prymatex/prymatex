@@ -19,6 +19,7 @@ from prymatex.support.process import RunningContext
 from prymatex.support.bundleitem.theme import DEFAULT_THEME_SETTINGS
 
 from prymatex.utils import encoding
+from prymatex.utils.decorators import memoize
 
 from prymatex.models.process import ExternalProcessTableModel
 from prymatex.models.support import (BundleItemTreeModel, BundleItemTreeNode,
@@ -570,6 +571,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def getAllBundleItemsNodesByTabTrigger(self, tab_trigger):
         return [ self.getManagedObjectNode(item.uuid) for item in self.getAllBundleItemsByTabTrigger(tab_trigger) ]
 
+    @memoize
     def getAllTabTriggerItemsNodesByScope(self, left_scope, right_scope=None):
         return [ self.getManagedObjectNode(item.uuid) for item in self.getAllTabTriggerItemsByScope(left_scope, right_scope) ]
 
@@ -590,8 +592,10 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def getFileExtensionItemsNodes(self, path, scope):
         return self.__filter_items(self.getAllBundleItemsNodesByFileExtension(path), scope)
 
+    @memoize
     def getAllKeySequences(self):
         return [ keyequivalent_to_keysequence(mnemonic) for mnemonic in self.getAllKeyEquivalentMnemonic() ]
+
     # ACTION NODES INTERFACE
     def getAllActionItemsNodes(self):
         return self.actionItemsProxyModel.nodes()

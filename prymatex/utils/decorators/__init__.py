@@ -5,5 +5,6 @@
 
 from .helpers import printparams, printparams_and_output, printtime, logtime
 from .deprecated import deprecated
+from .memoize import memoize
 from .cache import cacheable
 

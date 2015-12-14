@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
+import collections
 import functools
 
-def memoized(function):
-    '''Simple local cache kept during process execution'''
-    # See http://wiki.python.org/moin/PythonDecoratorLibrary#Memoize
-    cache = function.cache = {}
+#https://wiki.python.org/moin/PythonDecoratorLibrary#Memoize
 
-    @functools.wraps(function)
+def memoize(obj):
+    cache = obj.cache = {}
+
+    @functools.wraps(obj)
     def memoizer(*largs, **kwargs):
-        if largs in cache:
-            return cache[largs]
-        return cache.setdefault(largs, function(*largs, **kwargs))
+        key = str(largs) + str(kwargs)
+        if key not in cache:
+            cache[key] = obj(*largs, **kwargs)
+        return cache[key]
     return memoizer

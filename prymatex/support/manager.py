@@ -14,7 +14,7 @@ from prymatex.core import source
 from prymatex.utils import configparser
 from prymatex.utils import plist, osextra, six
 from prymatex.utils import encoding
-from prymatex.utils.decorators import cacheable
+from prymatex.utils.decorators import cacheable, memoize
 
 from .bundle import Bundle
 from .properties import Properties
@@ -704,6 +704,7 @@ class SupportBaseManager(object):
     def deleteTheme(self, theme, ns_name=config.USR_NS_NAME):
         pass
 
+    @memoize
     def getThemeSettings(self, theme, leftScope=None, rightScope=None):
         # If leftScope == rightScope == None then return base settings
         return self.__filter_items(theme.settings, leftScope, rightScope)
@@ -804,6 +805,7 @@ class SupportBaseManager(object):
     def getPreferences(self, leftScope=None, rightScope=None):
         return self.__filter_items(self.getAllPreferences(), leftScope, rightScope)
 
+    @memoize
     def getPreferenceSettings(self, leftScope=None, rightScope=None):
         # If leftScope == rightScope == None then return base settings
         return bundleitem.Preference.buildSettings([p.settings for p in self.getPreferences(leftScope, rightScope)])
@@ -928,6 +930,7 @@ class SupportBaseManager(object):
     def getAllKeyEquivalentMnemonic(self):
         return [ item.keyEquivalent for item in self.getAllKeyEquivalentItems() ]
 
+    @memoize
     def getKeyEquivalentItem(self, keyCode, leftScope, rightScope):
         return self.__filter_items(self.getAllBundleItemsByKeyEquivalent(keyCode), leftScope, rightScope)
 
