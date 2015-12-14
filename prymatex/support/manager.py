@@ -1027,7 +1027,7 @@ class SupportBaseManager(object):
         return items
 
     #-------------- KEYEQUIVALENT ------------------------
-    def getAllKeyEquivalentCodes(self):
+    def getAllKeyEquivalentMnemonic(self):
         memoizedKey = ("getAllKeyEquivalentCodes", None, None, None)
         if memoizedKey in self.bundleItemCache:
             return self.bundleItemCache.get(memoizedKey)
@@ -1052,7 +1052,7 @@ class SupportBaseManager(object):
         
 
     #------------- FILE EXTENSION, for drag commands -------------------------
-    def getFileExtensionItem(self, path, scope):
+    def getFileExtensionItems(self, path, scope):
         return self.__filter_items(self.getAllBundleItemsByFileExtension(path), scope)
 
     # ------------- ACTION ITEMS INTERFACE

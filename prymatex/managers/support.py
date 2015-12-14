@@ -363,33 +363,48 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def buildAdHocSnippet(self, *largs, **kwargs):
         return BundleItemTreeNode(SupportBaseManager.buildAdHocSnippet(self, *largs, **kwargs))
 
-    #---------------------------------------------------
-    # MANAGED OBJECTS OVERRIDE INTERFACE
-    #---------------------------------------------------
+    #--------------- MANAGED OBJECTS OVERRIDE INTERFACE
     def setDeleted(self, uuid):
         """
         Marcar un managed object como eliminado
         """
+        if isinstance(uuid, uuidmodule.UUID):
+            uuid = self.uuidtotext(uuid)
         self.deletedObjects.append(uuid)
-        deleted = [str(uuid).upper() for uuid in self.deletedObjects]
+        deleted = [uuid for uuid in self.deletedObjects]
         self.settings().setValue('deleted', deleted)
 
     def isDeleted(self, uuid):
+        if isinstance(uuid, uuidmodule.UUID):
+            uuid = self.uuidtotext(uuid)
         return uuid in self.deletedObjects
 
     def isEnabled(self, uuid):
+        if isinstance(uuid, uuidmodule.UUID):
+            uuid = self.uuidtotext(uuid)
         return uuid not in self.disabledObjects
     
     def setDisabled(self, uuid):
+        if isinstance(uuid, uuidmodule.UUID):
+            uuid = self.uuidtotext(uuid)
         self.disabledObjects.append(uuid)
-        disabled = [str(uuid).upper() for uuid in self.disabledObjects]
+        disabled = [uuid for uuid in self.disabledObjects]
         self.settings().setValue('disabled', disabled)
         
     def setEnabled(self, uuid):
+        if isinstance(uuid, uuidmodule.UUID):
+            uuid = self.uuidtotext(uuid)
         self.disabledObjects.remove(uuid)
-        disabled = [str(uuid).upper() for uuid in self.disabledObjects]
+        disabled = [uuid for uuid in self.disabledObjects]
         self.settings().setValue('disabled', disabled)
     
+    #--------------- MANAGED OBJECTS NODE INTERFACE
+    def getManagedObjectNode(self, uuid):
+        if isinstance(uuid, uuidmodule.UUID):
+            uuid = self.uuidtotext(uuid)
+        if not self.isDeleted(uuid):
+            return self._managed_objects.get(uuid)
+
     #---------------------------------------------------
     # BUNDLE OVERRIDE INTERFACE 
     #---------------------------------------------------
@@ -620,9 +635,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return self.bundleItemCache.setdefault(memoizedKey,
             items)
     
-    #---------------------------------------------------
-    # FILE EXTENSION OVERRIDE INTERFACE
-    #---------------------------------------------------
+    #----------- FILE EXTENSION NODE INTERFACE
     def getAllBundleItemsNodesByFileExtension(self, path):
         items = []
         for item in self.dragcommandProxyModel.nodes():
@@ -630,6 +643,9 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
                 items.append(item)
         return items
     
+    def getFileExtensionItemsNodes(self, path, scope):
+        return self.__filter_items(self.getAllBundleItemsByFileExtension(path), scope)
+
     #---------------------------------------------------
     # ACTION ITEMS INTERFACE
     #---------------------------------------------------
