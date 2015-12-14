@@ -9,6 +9,7 @@ from prymatex.qt import QtCore, QtGui
 
 from prymatex.core import PrymatexComponent
 from prymatex.utils import encoding
+from prymatex.utils.decorators import cacheable
 
 class ManagedStorage(object):
     def setManager(self, manager):
@@ -75,11 +76,9 @@ class StorageManager(PrymatexComponent, QtCore.QObject):
     # ------------- Settings
     def __init__(self, **kwargs):
         super(StorageManager, self).__init__(**kwargs)
-        self.cacheDirectory = ''
+        self.cache_directory = self.application().profile().get('PMX_CACHE_PATH')
         self.storages = []
-
-    def loadStorage(self, message_handler):
-        self.cacheDirectory = self.application().profile().get('PMX_CACHE_PATH')
+        cacheable.init_cache(os.path.join(self.cache_directory, self.buildFileName("internal-cache")))
 
     def buildFileName(self, text):
         """docstring for buildFileName"""
@@ -89,9 +88,9 @@ class StorageManager(PrymatexComponent, QtCore.QObject):
         storage.setManager(self)
         self.storages.append(storage)
 
-    def singleFileStorage(self, storageName):
-        fileName = self.buildFileName(storageName)
-        storagePath = os.path.join(self.cacheDirectory, fileName)
+    def singleFileStorage(self, storage_name):
+        file_name = self.buildFileName(storage_name)
+        storage_path = os.path.join(self.cache_directory, file_name)
         #storage = SingleFileStorage(storagePath)
         storage = MemoryStorage()
         self.__add_storage(storage)
@@ -105,3 +104,4 @@ class StorageManager(PrymatexComponent, QtCore.QObject):
     def close(self):
         for storage in self.storages:
             storage.close()
+        cacheable.close_cache()

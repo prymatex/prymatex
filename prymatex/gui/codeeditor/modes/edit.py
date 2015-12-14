@@ -27,8 +27,8 @@ class CodeEditorEditMode(CodeEditorBaseMode):
             yield handler
 
         # Bundle items 
-        trigger = keyevent_to_keysequence(event)
-        if trigger in self.application().supportManager.getAllKeyEquivalentCodes():
+        sequence = keyevent_to_keysequence(event)
+        if sequence in self.application().supportManager.getAllKeySequences():
             yield self.__insert_key_bundle_item
 
         # Pairs
@@ -167,21 +167,21 @@ class CodeEditorEditMode(CodeEditorBaseMode):
             # Suggestions
             words = self.editor.extractCompletions(alreadyTyped)
             words += self.editor.currentPreferenceSettings().completions
-            bundleitems = self.editor.application().supportManager.getAllTabTriggerItemsByScope(leftScope, rightScope)
-            triggers = {item.tabTrigger: item for item in bundleitems if item.tabTrigger.startswith(alreadyTyped)}
+            nodes = self.editor.application().supportManager.getAllTabTriggerItemsNodesByScope(leftScope, rightScope)
+            triggers = {node.bundleItem().tabTrigger: node for node in nodes if node.bundleItem().tabTrigger.startswith(alreadyTyped)}
             suggestions = sorted(set(words + list(triggers.keys())))
             def suggestions_generator(suggestions, words, triggers):
                 def _generator():
                     for suggestion in suggestions:
                         # Is bundle item
                         if suggestion in triggers:
-                            item = triggers[suggestion]
+                            node = triggers[suggestion]
                             yield {
-                                "icon": item.icon(), 
+                                "icon": node.icon(), 
                                 "match": suggestion,
-                                "tool_tip": "%s - %s" % (item.name, item.bundle.name),
-                                 "display": "%s(%s)" % (suggestion, item.name),
-                                "item": item
+                                "tool_tip": "%s - %s" % (node.nodeName(), node.bundleItem().bundle.name),
+                                "display": "%s(%s)" % (suggestion, node.nodeName()),
+                                "item": node.bundleItem()
                             }
                         if suggestion in words:
                             yield ("%s" % suggestion, suggestion)

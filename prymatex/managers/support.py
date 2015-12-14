@@ -9,6 +9,7 @@ import uuid as uuidmodule
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import rgba2color
+from prymatex.qt.helpers import keyequivalent_to_keysequence
 
 from prymatex.core import PrymatexComponent
 from prymatex.core.settings import ConfigurableItem
@@ -271,13 +272,6 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     # OVERRIDE: SupportManager.protectedNamespace()
     def protectedNamespace(self):
         return self.application().protectedNamespace()
-
-    # Override buildPlistFileStorage for custom storage
-    def buildPlistFileStorage(self):
-        return self.application().storageManager.singleFileStorage("support-plist")
-        
-    def buildBundleItemStorage(self):
-        return SupportBaseManager.buildBundleItemStorage(self)
     
     # ------------------- Signals
     def on_fileSystemWatcher_pathChanged(self, path):
@@ -467,7 +461,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
                 nodes.append(node)
         return nodes
 
-    # ----------------- THEME OVERRIDE INTERFACE
+    # ----------------- THEME INTERFACE
     def getThemeNode(self, uuid):
         return self.getManagedObjectNode(uuid)
 
@@ -541,9 +535,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         self.fileSystemWatcher.addPaths(watch)
         return properties
         
-    #---------------------------------------------------
     # STATICFILE OVERRIDE INTERFACE
-    #---------------------------------------------------
     def addStaticFile(self, static_file):
         static_file_node = BundleItemTreeNode(static_file)
         bundle_item_node = self.getBundleItem(static_file.parentItem.uuid)
@@ -552,9 +544,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def removeStaticFile(self, file):
         pass
 
-    #---------------------------------------------------
-    # THEME STYLE OVERRIDE INTERFACE
-    #---------------------------------------------------
+    # THEME STYLE INTERFACE
     def getThemeStyleNode(self, uuid):
         indexes = self.themeStylesTableModel.match(self.bundleTreeModel.index(0, 0, QtCore.QModelIndex()),
             QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive)
@@ -569,44 +559,24 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def removeThemeStyle(self, style):
         self.themeStylesTableModel.removeStyle(style)
 
-    #---------------------------------------------------
     # PREFERENCES INTERFACE
-    #---------------------------------------------------
     def getAllPreferencesNodes(self):
-        memoizedKey = ("getAllPreferences", None, None, None)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            list(self.preferenceProxyModel.nodes()))
+        return self.preferenceProxyModel.nodes()
 
-    #---------------------------------------------------
-    # TABTRIGGERS OVERRIDE INTERFACE
-    #---------------------------------------------------
+    # TABTRIGGERS INTERFACE
     def getAllTabTriggerItemsNodes(self):
-        memoizedKey = ("getAllTabTriggerItems", None, None, None)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        tabTriggers = []
-        for item in self.actionItemsProxyModel.nodes():
-            if item.tabTrigger is not None:
-                tabTriggers.append(item)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            tabTriggers)
+        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllTabTriggerItems() ]
         
-    def getAllBundleItemsNodesByTabTrigger(self, tabTrigger):
-        memoizedKey = ("getAllBundleItemsByTabTrigger", tabTrigger, None, None)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        items = []
-        for item in self.actionItemsProxyModel.nodes():
-            if item.tabTrigger == tabTrigger:
-                items.append(item)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            items)
+    def getAllBundleItemsNodesByTabTrigger(self, tab_trigger):
+        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllBundleItemsByTabTrigger(tab_trigger) ]
 
-    #---------------------------------------------------
-    # KEYEQUIVALENT OVERRIDE INTERFACE
-    #---------------------------------------------------
+    def getAllTabTriggerItemsNodesByScope(self, left_scope, right_scope=None):
+        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllTabTriggerItemsByScope(left_scope, right_scope) ]
+
+    def getTabTriggerItemNode(self, tab_trigger, left_scope, right_scope):
+        return [ self.getManagedObjectNode(item.uuid) for item in self.getTabTriggerItem(tab_trigger, left_scope, right_scope) ]
+
+    # KEYEQUIVALENT INTERFACE
     def getAllKeyEquivalentItemsNodes(self):
         return [ self.getManagedObjectNode(item.uuid) for item in self.getAllKeyEquivalentItems() ]
         
@@ -620,9 +590,9 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def getFileExtensionItemsNodes(self, path, scope):
         return self.__filter_items(self.getAllBundleItemsNodesByFileExtension(path), scope)
 
-    #---------------------------------------------------
-    # ACTION ITEMS INTERFACE
-    #---------------------------------------------------
+    def getAllKeySequences(self):
+        return [ keyequivalent_to_keysequence(mnemonic) for mnemonic in self.getAllKeyEquivalentMnemonic() ]
+    # ACTION NODES INTERFACE
     def getAllActionItemsNodes(self):
         return self.actionItemsProxyModel.nodes()
     

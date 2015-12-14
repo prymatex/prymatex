@@ -14,7 +14,7 @@ from prymatex.core import source
 from prymatex.utils import configparser
 from prymatex.utils import plist, osextra, six
 from prymatex.utils import encoding
-from prymatex.utils.decorators import printtime, printparams
+from prymatex.utils.decorators import cacheable
 
 from .bundle import Bundle
 from .properties import Properties
@@ -70,10 +70,6 @@ class SupportBaseManager(object):
         self._properties = {}
         self._auxiliaries = {}
         
-        # Stored Cache!!
-        self.bundleItemCache = self.buildBundleItemStorage()
-        self.plistFileCache = self.buildPlistFileStorage()
-        
     # ------------ Namespaces ----------------------
     def addNamespace(self, namespace):
         bundles = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
@@ -108,20 +104,18 @@ class SupportBaseManager(object):
         self.environment.update(env)
 
     #--------------- Plist --------------------
-    def readPlist(self, path):
+    @staticmethod
+    @cacheable(stamp_function=os.path.getmtime)
+    def readPlist(path):
         return plist.readPlist(path)
-        # TODO Los chache
-        if path in self.plistFileCache:
-            return self.plistFileCache.get(path)
-        return self.plistFileCache.setdefault(path, plist.readPlist(path))
 
-    def writePlist(self, hashData, path):
-        # TODO Los chache
-        #self.plistFileCache.set(path, hashData)
+    @staticmethod
+    def writePlist(hashData, path):
         return plist.writePlist(hashData, path)
 
     #--------------- Tools --------------------
-    def uuidgen(self, uuid=None):
+    @staticmethod
+    def uuidgen(uuid=None):
         if uuid is None:
             return uuidmodule.uuid1()
         try:
@@ -130,7 +124,8 @@ class SupportBaseManager(object):
             # Generate
             return uuidmodule.uuid3(uuidmodule.NAMESPACE_DNS, uuid)
 
-    def uuidtotext(self, uuid):
+    @staticmethod
+    def uuidtotext(uuid):
         return six.text_type(uuid).upper()
     
     #--------------- Run system commands --------------------
@@ -374,50 +369,6 @@ class SupportBaseManager(object):
                     self.logger().debug("New bundle item %s." % path)
                     item = self.loadBundleItem(klass, item_source, bundle)
         self.populatedBundle(bundle)
-
-    # ------------ Build Storages --------------------
-    def buildPlistFileStorage(self):
-        return {}
-
-    def buildBundleItemStorage(self):
-        return {}
-
-    # ------------ Cache coherence -----------------
-    def updateBundleItemCacheCoherence(self, bundleItem, attrs):
-        # TODO NamedTuples para las keys
-        keys = []
-        testKeyEquivalent = bool('keyEquivalent' in attrs and bundleItem.keyEquivalent != attrs['keyEquivalent'])
-        testTabTrigger = bool('tabTrigger' in attrs and bundleItem.tabTrigger != attrs['tabTrigger'])
-        testScope = bool('scope' in attrs and bundleItem.scope != attrs['scope'])
-        testPreference = bool(bundleItem.type() == 'preference')
-
-        scopeSelectorItem = testScope and self.selectorFactory(bundleItem.scope) or None
-        scopeSelectorAttr = testScope and self.selectorFactory(attrs['scope']) or None
-        
-        # Add keys for remove
-        for key in self.bundleItemCache.keys():
-            if testKeyEquivalent:
-                if (key[0] == "getKeyEquivalentItem" and key[1] in [ bundleItem.keyEquivalent, attrs['keyEquivalent']]) or\
-                key[0] == "getAllKeyEquivalentItems":
-                    keys.append(key)
-                    continue
-            if testTabTrigger:
-                if (key[0] == "getTabTriggerItem" and key[1] in [ bundleItem.tabTrigger, attrs['tabTrigger']]) or\
-                key[0] == "getAllTabTriggerItems":
-                    keys.append(key)
-                    continue
-            if testPreference and key[0] == "getPreferenceSettings":
-                keys.append(key)
-                continue
-            if testScope and ( (key[2] and scopeSelectorItem.does_match(key[2])) or\
-            (key[3] and scopeSelectorItem.does_match(key[3])) or\
-            (key[2] and scopeSelectorAttr.does_match(key[2])) or\
-            (key[3] and scopeSelectorAttr.does_match(key[3]))):
-                keys.append(key)    
-            
-        # Quitar claves
-        for key in keys:
-            self.bundleItemCache.pop(key)
 
     # ----------- MANAGED OBJECTS INTERFACE
     def setDeleted(self, uuid):
@@ -692,8 +643,6 @@ class SupportBaseManager(object):
     
     def updateBundleItem(self, bundleItem, ns_name=config.USR_NS_NAME, **attrs):
         """Actualiza un bundle item"""
-        self.updateBundleItemCacheCoherence(bundleItem, attrs)
-
         namespace = self.namespace(ns_name)
         p_ns_name = self.protectedNamespace().name
         assert namespace is not None, "No namespace for %s" % ns_name
@@ -757,12 +706,7 @@ class SupportBaseManager(object):
 
     def getThemeSettings(self, theme, leftScope=None, rightScope=None):
         # If leftScope == rightScope == None then return base settings
-        memoizedKey = ("getThemeSettings", theme.uuidAsText(), leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            bundleitem.Theme.buildSettings(
-                self.__filter_items(theme.settings, leftScope, rightScope)))
+        return self.__filter_items(theme.settings, leftScope, rightScope)
 
     # ------------- STATICFILE INTERFACE
     def addStaticFile(self, file):
@@ -858,22 +802,11 @@ class SupportBaseManager(object):
 
     #----------------- PREFERENCES ---------------------
     def getPreferences(self, leftScope=None, rightScope=None):
-        memoizedKey = ("getPreferences", None, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            self.__filter_items(self.getAllPreferences(), leftScope, rightScope))
+        return self.__filter_items(self.getAllPreferences(), leftScope, rightScope)
 
     def getPreferenceSettings(self, leftScope=None, rightScope=None):
         # If leftScope == rightScope == None then return base settings
-        memoizedKey = ("getPreferenceSettings", None, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            bundleitem.Preference.buildSettings(
-                [p.settings for p in self.getPreferences(leftScope, rightScope)]
-            )
-        )
+        return bundleitem.Preference.buildSettings([p.settings for p in self.getPreferences(leftScope, rightScope)])
 
     #----------------- PROPERTIES ---------------------
     def _load_parser(self, directory):
@@ -954,28 +887,15 @@ class SupportBaseManager(object):
     # ----------------- TABTRIGGERS INTERFACE
     def getAllTabTriggerItems(self):
         """Return a list of all tab triggers items"""
-        actions = self.getAllActionItems()
-        tabTriggers = []
-        for item in actions:
-            if item.tabTrigger is not None:
-                tabTriggers.append(item)
-        return tabTriggers
+        return [ item for item in self.getAllActionItems() if item.tabTrigger is not None ]
 
-    def getAllBundleItemsByTabTrigger(self, tabTrigger):
+    def getAllBundleItemsByTabTrigger(self, tab_trigger):
         """Return a list of tab triggers bundle items"""
-        items = []
-        for item in self.getAllTabTriggerItems():
-            if item.tabTrigger == tabTrigger:
-                items.append(item)
-        return items
+        return [ item for item in self.getAllTabTriggerItems() if item.tabTrigger == tab_trigger ]
 
     # --------------- TABTRIGGERS
     def getAllTabTriggerSymbols(self):
-        memoizedKey = ("getAllTabTriggerSymbols", None, None, None)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            [ item.tabTrigger for item in self.getAllTabTriggerItems() ])
+        return [ item.tabTrigger for item in self.getAllTabTriggerItems() ]
 
     def getTabTriggerSymbol(self, line, index):
         line = line[:index][::-1]
@@ -988,56 +908,28 @@ class SupportBaseManager(object):
                     best = (trigger, length)
             return best[0]
 
-    def getAllTabTriggerItemsByScope(self, leftScope, rightScope = None):
-        memoizedKey = ("getAllTabTriggerItemsByScope", None, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            self.__filter_items(self.getAllTabTriggerItems(), leftScope, rightScope))
+    def getAllTabTriggerItemsByScope(self, leftScope, rightScope=None):
+        return self.__filter_items(self.getAllTabTriggerItems(), leftScope, rightScope)
 
     def getTabTriggerItem(self, tabTrigger, leftScope, rightScope):
-        memoizedKey = ("getTabTriggerItem", tabTrigger, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            self.__filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), leftScope, rightScope))
+        return self.__filter_items(self.getAllBundleItemsByTabTrigger(tabTrigger), leftScope, rightScope)
 
     # -------------- KEYEQUIVALENT INTERFACE
     def getAllKeyEquivalentItems(self):
         """Return a list of all key equivalent items"""
-        actions = self.getAllActionItems()
-        keyEquivalents = []
-        for item in actions:
-            if item.keyEquivalent is not None:
-                keyEquivalents.append(item)
-        syntaxes = self.getAllSyntaxes()
-        for item in syntaxes:
-            if item.keyEquivalent is not None:
-                keyEquivalents.append(item)
-        return keyEquivalents
+        return [ item for item in self.getAllActionItems() if item.keyEquivalent is not None ] + \
+            [ item for item in self.getAllSyntaxes() if item.keyEquivalent is not None ]
 
     def getAllBundleItemsByKeyEquivalent(self, key_equivalent):
         """Return a list of key equivalent bundle items"""
-        items = []
-        for item in self.getAllKeyEquivalentItems():
-            if item.keyEquivalent == key_equivalent:
-                items.append(item)
-        return items
+        return [ item for item in self.getAllTabTriggerItems() if item.keyEquivalent == key_equivalent ]
 
     #-------------- KEYEQUIVALENT ------------------------
     def getAllKeyEquivalentMnemonic(self):
-        memoizedKey = ("getAllKeyEquivalentCodes", None, None, None)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            [item.keyEquivalent for item in self.getAllKeyEquivalentItems()])
+        return [ item.keyEquivalent for item in self.getAllKeyEquivalentItems() ]
 
     def getKeyEquivalentItem(self, keyCode, leftScope, rightScope):
-        memoizedKey = ("getKeyEquivalentItem", "%s" % keyCode, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            self.__filter_items(self.getAllBundleItemsByKeyEquivalent(keyCode), leftScope, rightScope))
+        return self.__filter_items(self.getAllBundleItemsByKeyEquivalent(keyCode), leftScope, rightScope)
 
     # --------------- FILE EXTENSION INTERFACE
     def getAllBundleItemsByFileExtension(self, path):
@@ -1060,11 +952,7 @@ class SupportBaseManager(object):
     #---------------- ACTION ITEMS FOR SCOPE ---------------------------------
     def getActionItemsByScope(self, leftScope, rightScope):
         """Return a list of actions items for scope"""
-        memoizedKey = ("getActionItemsByScope", None, leftScope, rightScope)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            self.__filter_items(self.getAllActionItems(), leftScope, rightScope))
+        return self.__filter_items(self.getAllActionItems(), leftScope, rightScope)
 
     # ------------------ SYNTAXES INTERFACE
     def getAllSyntaxes(self):
@@ -1072,11 +960,7 @@ class SupportBaseManager(object):
 
     # ------------------ SYNTAXES
     def getSyntaxesAsDictionary(self):
-        memoizedKey = ("getSyntaxesAsDictionary", None, None, None)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
-        return self.bundleItemCache.setdefault(memoizedKey,
-            dict([(syntax.scopeName, syntax) for syntax in self.getAllSyntaxes()]))
+        return dict([(syntax.scopeName, syntax) for syntax in self.getAllSyntaxes()])
 
     def getSyntaxes(self, sort=False):
         stxs = []
@@ -1087,9 +971,6 @@ class SupportBaseManager(object):
         return stxs
 
     def getSyntaxesByScope(self, scope):
-        memoizedKey = ("getSyntaxesByScopeName", scope, None, None)
-        if memoizedKey in self.bundleItemCache:
-            return self.bundleItemCache.get(memoizedKey)
         context = self.contextFactory(scope)
         syntaxes = []
         for syntax in self.getAllSyntaxes():
@@ -1097,8 +978,7 @@ class SupportBaseManager(object):
             if syntax.scopeNameSelector.does_match(context, rank):
                 syntaxes.append((rank.pop(), syntax))
         syntaxes.sort(key=lambda t: t[0], reverse=True)
-        return self.bundleItemCache.setdefault(memoizedKey, 
-            [score_syntax[1] for score_syntax in syntaxes])
+        return [score_syntax[1] for score_syntax in syntaxes]
 
     def findSyntaxByFirstLine(self, line):
         syntaxes = filter(lambda i: i.type() == "syntax", self._managed_objects.values())
