@@ -53,16 +53,14 @@ class BundleItemTreeModel(AbstractTreeModel):
             return QtCore.Qt.NoItemFlags  
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
 
-    def removeRows(self, position = 0, count = 1,  parent = QtCore.QModelIndex()):
+    def removeRows(self, position=0, count=1,  parent=QtCore.QModelIndex()):
         # TODO Quien usa este metodo?
         node = self.node(parent)
         self.beginRemoveRows(parent, position, position + count - 1)  
         node.popChild(position)  
         self.endRemoveRows()
 
-    #========================================================================
-    # Functions
-    #========================================================================
+    # -------------------- Append and remove nodes
     def appendBundle(self, bundle):
         self.appendNode(bundle)
     
