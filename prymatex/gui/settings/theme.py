@@ -34,7 +34,7 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         
         theme_uuid = self.settings().get('default_theme')
         if theme_uuid is not None:
-            default_theme = self.application().supportManager.getThemeNode(theme_uuid)
+            default_theme = self.application().supportManager.getTheme(theme_uuid)
             if default_theme is not None:
                 self.updateUi(default_theme)
         
@@ -67,9 +67,9 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
     def on_comboBoxThemes_activated(self, index):
         modelIndex = self.comboBoxThemes.model().index(index)
         theme = self.comboBoxThemes.model().node(modelIndex)
-        self.updateUi(theme)
-        self.settings().set('default_theme', theme.uuid())
         item = theme.bundleItem()
+        self.updateUi(item)
+        self.settings().set('default_theme', theme.uuid())
         message = "<b>%s</b> theme set " % item.name
         if item.author is not None:
             message += "<i>(by %s)</i>" % item.author
@@ -77,9 +77,9 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
 
     def updateUi(self, theme):
         self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().nodeIndex(theme).row())    
-        palette = self.application().supportManager.getThemePalette(theme.bundleItem())
+        palette = self.application().supportManager.getThemePalette(theme)
         # Filter theme proxy model
-        self.application().supportManager.themeStyleProxyModel.setFilterRegExp(theme.uuid())
+        self.application().supportManager.themeStyleProxyModel.setFilterRegExp(theme.uuidAsText())
 
         # Set color for table view
         self.tableViewStyles.setPalette(palette)
