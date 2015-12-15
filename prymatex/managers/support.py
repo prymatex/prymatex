@@ -54,7 +54,7 @@ class BundleItemMenuGroup(QtCore.QObject):
             if uuid.startswith('-'):
                 menu.addSeparator()
                 continue
-            node = self.manager.getBundleItemNode(uuid)
+            node = self.manager.getManagedObjectNode(uuid)
             if node is not None:
                 action = node.triggerItemAction(parent)
                 menu.addAction(action)
@@ -352,12 +352,6 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         
         return context
 
-    def buildAdHocCommand(self, *largs, **kwargs):
-        return BundleItemTreeNode(SupportBaseManager.buildAdHocCommand(self, *largs, **kwargs))
-
-    def buildAdHocSnippet(self, *largs, **kwargs):
-        return BundleItemTreeNode(SupportBaseManager.buildAdHocSnippet(self, *largs, **kwargs))
-
     #--------------- MANAGED OBJECTS OVERRIDE INTERFACE
     def setDeleted(self, uuid):
         """
@@ -403,12 +397,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
             if indexes:
                 return self.bundleTreeModel.node(indexes[0])
 
-    #---------------------------------------------------
-    # BUNDLE OVERRIDE INTERFACE 
-    #---------------------------------------------------
-    def getBundleNode(self, uuid):
-        return self.getManagedObjectNode(uuid)
-
+    # -------------------- BUNDLE INTERFACE 
     def onBundleAdded(self, bundle):
         bundle_node = BundleItemTreeNode(bundle)
         icon = self.resources().get_icon("bundle-item-%s" % bundle.type())
@@ -427,22 +416,17 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return self.bundleProxyModel.nodes()
     
     def getDefaultBundle(self):
-        return self.getBundleNode(self.defaultBundleForNewBundleItems)
+        return self.getManagedObjectNode(self.defaultBundleForNewBundleItems)
     
-    def populatedBundle(self, bundle):
-        bundle_node = self.getBundleNode(bundle.uuid)
+    def onBundlePopulated(self, bundle):
+        bundle_node = self.getManagedObjectNode(bundle.uuid)
         if bundle_node is not None:
             self.bundlePopulated.emit(bundle_node)
         
-    #---------------------------------------------------
-    # BUNDLEITEM OVERRIDE INTERFACE 
-    #---------------------------------------------------
-    def getBundleItemNode(self, uuid):
-        return self.getManagedObjectNode(uuid)
-
+    # --------------------------- BUNDLEITEM INTERFACE 
     def onBundleItemAdded(self, bundle_item):
         bundle_item_node = BundleItemTreeNode(bundle_item)
-        bundle_node = self.getBundleNode(bundle_item.bundle.uuid)
+        bundle_node = self.getManagedObjectNode(bundle_item.bundle.uuid)
         icon = self.resources().get_icon("bundle-item-%s" % bundle_item.type())
         bundle_item_node.setIcon(icon)
         self.bundleTreeModel.appendBundleItem(bundle_item_node, bundle_node)
@@ -463,9 +447,6 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return nodes
 
     # ----------------- THEME INTERFACE
-    def getThemeNode(self, uuid):
-        return self.getManagedObjectNode(uuid)
-
     def getThemePalette(self, theme, scope=None):
         settings = self.getThemeSettings(theme, scope)
         palette = self.application().palette()
@@ -513,7 +494,8 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
             palette.setColor(QtGui.QPalette.ToolTipText, rgba2color(settings['gutterForeground']))
         #QPalette::Link	14	A text color used for unvisited hyperlinks. By default, the link color is Qt::blue.
         return palette
-        
+
+    @memoize(key_function=lambda m, theme, scope=None: "%s-%s" % (str(theme.uuid), str(scope)))
     def getThemeTextCharFormat(self, theme, scope=None):
         settings = self.getThemeSettings(theme, scope)
         frmt = QtGui.QTextCharFormat()
@@ -537,13 +519,17 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return properties
         
     # STATICFILE OVERRIDE INTERFACE
-    def addStaticFile(self, static_file):
+    def onStaticFileAdded(self, static_file):
         static_file_node = BundleItemTreeNode(static_file)
         bundle_item_node = self.getBundleItem(static_file.parentItem.uuid)
         self.bundleTreeModel.appendStaticFile(static_file_node, bundle_item_node)
     
     def removeStaticFile(self, file):
         pass
+
+    @memoize(key_function=lambda m: "all-key-sequences")
+    def getAllKeySequences(self):
+        return [ keyequivalent_to_keysequence(mnemonic) for mnemonic in self.getAllKeyEquivalentMnemonic() ]
 
     # THEME STYLE INTERFACE
     def getThemeStyleNode(self, uuid):
@@ -560,55 +546,15 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def removeThemeStyle(self, style):
         self.themeStylesTableModel.removeStyle(style)
 
-    # PREFERENCES INTERFACE
-    def getAllPreferencesNodes(self):
-        return self.preferenceProxyModel.nodes()
-
-    # TABTRIGGERS INTERFACE
-    def getAllTabTriggerItemsNodes(self):
-        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllTabTriggerItems() ]
-        
-    def getAllBundleItemsNodesByTabTrigger(self, tab_trigger):
-        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllBundleItemsByTabTrigger(tab_trigger) ]
-
-    @memoize
-    def getAllTabTriggerItemsNodesByScope(self, left_scope, right_scope=None):
-        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllTabTriggerItemsByScope(left_scope, right_scope) ]
-
-    def getTabTriggerItemNode(self, tab_trigger, left_scope, right_scope):
-        return [ self.getManagedObjectNode(item.uuid) for item in self.getTabTriggerItem(tab_trigger, left_scope, right_scope) ]
-
-    # KEYEQUIVALENT INTERFACE
-    def getAllKeyEquivalentItemsNodes(self):
-        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllKeyEquivalentItems() ]
-        
-    def getAllBundleItemsNodesByKeyEquivalent(self, key_equivalent):
-        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllBundleItemsByKeyEquivalent(key_equivalent) ]
-    
-    #----------- FILE EXTENSION NODE INTERFACE
-    def getAllBundleItemsNodesByFileExtension(self, path):
-        return [ self.getManagedObjectNode(item.uuid) for item in self.getAllBundleItemsByFileExtension(path) ]
-    
-    def getFileExtensionItemsNodes(self, path, scope):
-        return self.__filter_items(self.getAllBundleItemsNodesByFileExtension(path), scope)
-
-    @memoize
-    def getAllKeySequences(self):
-        return [ keyequivalent_to_keysequence(mnemonic) for mnemonic in self.getAllKeyEquivalentMnemonic() ]
-
     # ACTION NODES INTERFACE
     def getAllActionItemsNodes(self):
         return self.actionItemsProxyModel.nodes()
     
-    #---------------------------------------------------
     # SYNTAXES INTERFACE
-    #---------------------------------------------------
     def getAllSyntaxesNodes(self):
         return self.syntaxProxyModel.nodes()
 
-    #---------------------------------------------------
     # CURSOR SCOPE
-    #---------------------------------------------------
     def cursorScope(self, cursor):
         left_scope = self.scopeFactory("")
         right_scope = self.scopeFactory("")

@@ -156,29 +156,28 @@ class SupportBaseManager(object):
         return context
 
     #--------------- Ad-Hoc Bundle Items --------------
-    def buildAdHocCommand(self, commandScript, bundle, name=None, commandInput="none", commandOutput="insertText"):
-        commandHash = {'command': commandScript,
-                       'input': commandInput,
-                       'output': commandOutput}
-        commandHash['name'] = name if name is not None else "Ad-Hoc command %s" % commandScript
-
+    def buildAdHocCommand(self, script, bundle, name=None, c_input="none", c_output="insertText"):
         command = bundleitem.Command(self.uuidgen(), self, bundle)
-        command.load(commandHash)
+        command.load({
+            'name': name or "Ad-Hoc command %s" % script,
+            'command': script,
+            'input': c_input,
+            'output': c_output})
         return command
 
-    def buildAdHocSnippet(self, snippetContent, bundle, name=None, tabTrigger=None):
-        snippetHash = {'content': snippetContent,
-                       'tabTrigger': tabTrigger}
-        snippetHash['name'] = name if name is not None else "Ad-Hoc snippet"
+    def buildAdHocSnippet(self, content, bundle, name=None, tab_trigger=None):
         snippet = bundleitem.Snippet(self.uuidgen(), self, bundle)
-        snippet.load(snippetHash)
+        snippet.load({
+            'name': name or "Ad-Hoc snippet",
+            'content': content,
+            'tabTrigger': tab_trigger})
         return snippet
 
     def buildAdHocSyntax(self, syntax, bundle, name=None):
-        syntaxHash = syntax.copy()
-        syntaxHash['name'] = name if name is not None else "Ad-Hoc syntax"
+        snippet_hash = syntax.copy()
+        snippet_hash['name'] = name or "Ad-Hoc syntax"
         syntax = bundleitem.Syntax(self.uuidgen(), self, bundle)
-        syntax.load(syntaxHash)
+        syntax.load(snippet_hash)
         return syntax
 
     #--------------- Scopes selectors and context --------------
@@ -245,8 +244,8 @@ class SupportBaseManager(object):
         if bundle is None:
             bundle = Bundle(uuid, self)
             bundle.load(data)
-            self.onBundleAdded(bundle)
             self.addManagedObject(bundle)
+            self.onBundleAdded(bundle)
         else:
             bundle.load(data)
         bundle.addSource(source)
@@ -264,7 +263,7 @@ class SupportBaseManager(object):
                     item_source = source.Source(namespace.name, path)
                     bundleItem = self.loadBundleItem(klass, item_source, bundle)
         bundle.setPopulated(True)
-        self.populatedBundle(bundle)
+        self.onBundlePopulated(bundle)
 
     def loadBundleItem(self, klass, source, bundle):
         data = self.readPlist(klass.dataFilePath(source.path))
@@ -277,8 +276,8 @@ class SupportBaseManager(object):
             for staticPath in klass.staticFilePaths(source.path):
                 # TODO: Ver que hacer con directorios
                 staticFile = StaticFile(staticPath, bundleItem)
-                self.addStaticFile(staticFile)
                 bundleItem.addStaticFile(staticFile)
+                self.onStaticFileAdded(staticFile)
             self.addManagedObject(bundleItem)
         else:
             bundleItem.load(data)
@@ -368,7 +367,7 @@ class SupportBaseManager(object):
                     item_source = source.Source(namespace.name, path)
                     self.logger().debug("New bundle item %s." % path)
                     item = self.loadBundleItem(klass, item_source, bundle)
-        self.populatedBundle(bundle)
+        self.onBundlePopulated(bundle)
 
     # ----------- MANAGED OBJECTS INTERFACE
     def setDeleted(self, uuid):
@@ -470,7 +469,7 @@ class SupportBaseManager(object):
         """Llamado luego de eliminar un bundle"""
         pass
 
-    def populatedBundle(self, bundle):
+    def onBundlePopulated(self, bundle):
         """Llamado luego de popular un bundle"""
         pass
 
@@ -506,8 +505,8 @@ class SupportBaseManager(object):
         bundle.addSource(bundle_source)
         self.saveManagedObject(bundle, bundle_source)
         
-        self.onBundleAdded(bundle)
         self.addManagedObject(bundle)
+        self.onBundleAdded(bundle)
         return bundle
 
     def readBundle(self, **attrs):
@@ -581,13 +580,13 @@ class SupportBaseManager(object):
         return self.getManagedObject(uuid)
 
     def onBundleItemAdded(self, bundle_item):
-        raise NotImplemented
+        pass
 
     def modifyBundleItem(self, bundle_item):
-        raise NotImplemented
+        pass
 
     def removeBundleItem(self, bundle_item):
-        raise NotImplemented
+        pass
 
     def getAllBundleItems(self):
         return []
@@ -630,8 +629,8 @@ class SupportBaseManager(object):
         bundleItem.addSource(item_source)
         self.saveManagedObject(bundleItem, item_source)
         
-        self.onBundleItemAdded(bundleItem)
         self.addManagedObject(bundleItem)
+        self.onBundleItemAdded(bundleItem)
         return bundleItem
 
     def readBundleItem(self, **attrs):
@@ -704,13 +703,13 @@ class SupportBaseManager(object):
     def deleteTheme(self, theme, ns_name=config.USR_NS_NAME):
         pass
 
-    @memoize
-    def getThemeSettings(self, theme, leftScope=None, rightScope=None):
+    @memoize(key_function=lambda m, theme, left_scope=None, right_scope=None: "%s-%s-%s" % (str(theme.uuid), str(left_scope), str(right_scope)))
+    def getThemeSettings(self, theme, left_scope=None, right_scope=None):
         # If leftScope == rightScope == None then return base settings
-        return self.__filter_items(theme.settings, leftScope, rightScope)
+        return bundleitem.Theme.buildSettings(self.__filter_items(theme.settings, left_scope, right_scope))
 
     # ------------- STATICFILE INTERFACE
-    def addStaticFile(self, file):
+    def onStaticFileAdded(self, file):
         pass
 
     def removeStaticFile(self, file):
@@ -727,8 +726,8 @@ class SupportBaseManager(object):
         path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), osextra.to_valid_name(name))
         staticFile = StaticFile(path, parentItem)
         #No es la mejor forma pero es la forma de guardar el archivo
-        self.addStaticFile(staticFile)
         parentItem.addStaticFile(staticFile)
+        self.onStaticFileAdded(staticFile)
         staticFile.save()
         return staticFile
 
@@ -805,10 +804,10 @@ class SupportBaseManager(object):
     def getPreferences(self, leftScope=None, rightScope=None):
         return self.__filter_items(self.getAllPreferences(), leftScope, rightScope)
 
-    @memoize
-    def getPreferenceSettings(self, leftScope=None, rightScope=None):
+    @memoize(key_function=lambda m, left_scope=None, right_scope=None: "%s-%s" % (left_scope, right_scope)) 
+    def getPreferenceSettings(self, left_scope=None, right_scope=None):
         # If leftScope == rightScope == None then return base settings
-        return bundleitem.Preference.buildSettings([p.settings for p in self.getPreferences(leftScope, rightScope)])
+        return bundleitem.Preference.buildSettings([p.settings for p in self.getPreferences(left_scope, right_scope)])
 
     #----------------- PROPERTIES ---------------------
     def _load_parser(self, directory):
@@ -910,13 +909,13 @@ class SupportBaseManager(object):
                     best = (trigger, length)
             return best[0]
     
-    @memoize
-    def getAllTabTriggerItemsByScope(self, leftScope, rightScope=None):
-        return self.__filter_items(self.getAllTabTriggerItems(), leftScope, rightScope)
+    @memoize(key_function=lambda m, left_scope, right_scope=None: "%s-%s" % (left_scope, right_scope)) 
+    def getAllTabTriggerItemsByScope(self, left_scope, right_scope=None):
+        return self.__filter_items(self.getAllTabTriggerItems(), left_scope, right_scope)
 
-    @memoize
-    def getTabTriggerItem(self, tab_trigger, leftScope, rightScope):
-        return self.__filter_items(self.getAllBundleItemsByTabTrigger(tab_trigger), leftScope, rightScope)
+    @memoize(key_function=lambda m, tab_trigger, left_scope, right_scope: "%s-%s-%s" % (tab_trigger, left_scope, right_scope)) 
+    def getTabTriggerItem(self, tab_trigger, left_scope, right_scope):
+        return self.__filter_items(self.getAllBundleItemsByTabTrigger(tab_trigger), left_scope, right_scope)
 
     # -------------- KEYEQUIVALENT INTERFACE
     def getAllKeyEquivalentItems(self):
@@ -932,9 +931,9 @@ class SupportBaseManager(object):
     def getAllKeyEquivalentMnemonic(self):
         return [ item.keyEquivalent for item in self.getAllKeyEquivalentItems() ]
 
-    @memoize
-    def getKeyEquivalentItem(self, keyCode, leftScope, rightScope):
-        return self.__filter_items(self.getAllBundleItemsByKeyEquivalent(keyCode), leftScope, rightScope)
+    @memoize(key_function=lambda m, key_equivalent, left_scope, right_scope: "%s-%s-%s" % (key_equivalent, left_scope, right_scope)) 
+    def getKeyEquivalentItem(self, key_equivalent, left_scope, right_scope):
+        return self.__filter_items(self.getAllBundleItemsByKeyEquivalent(key_equivalent), left_scope, right_scope)
 
     # --------------- FILE EXTENSION INTERFACE
     def getAllBundleItemsByFileExtension(self, path):

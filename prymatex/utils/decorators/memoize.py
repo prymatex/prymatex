@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
-import collections
 import functools
 
-#https://wiki.python.org/moin/PythonDecoratorLibrary#Memoize
+class memoize(object):
+    def __init__(self, key_function=lambda *largs, **kwargs: str(largs) + str(kwargs)):
+        self.key_function = key_function
 
-def memoize(obj):
-    cache = obj.cache = {}
-
-    @functools.wraps(obj)
-    def memoizer(*largs, **kwargs):
-        key = str(largs) + str(kwargs)
-        if key not in cache:
-            cache[key] = obj(*largs, **kwargs)
-        return cache[key]
-    return memoizer
+    def __call__(self, func):
+        cache = func.cache = {}
+        @functools.wraps(func)
+        def wrapped(*largs, **kwargs):
+            key = self.key_function(*largs, **kwargs)
+            if key not in cache:
+                cache[key] = func(*largs, **kwargs)
+            return cache[key]
+        return wrapped
