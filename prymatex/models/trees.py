@@ -220,8 +220,7 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
         return QtCore.QModelIndex()
 
     def nodes(self):
-        for index in self.__indexMap:
-            yield self.sourceModel().node(index)
+        return [self.sourceModel().node(index) for index in self.__indexMap]
 
     def filterAcceptsRow(self, sourceRow, sourceParent):
         return True
@@ -235,22 +234,19 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     def compareIndex(self, xindex, yindex):
         return 0
     
-    def mapToSource(self, proxyIndex):
-        return self.__indexMap[proxyIndex.row()]
+    def mapToSource(self, index):
+        return self.__indexMap[index.row()]
 
-    def mapFromSource(self, sourceIndex):
-        return self.index(self.__indexMap.index(sourceIndex))
+    def mapFromSource(self, index):
+        return self.index(self.__indexMap.index(index))
             
     def columnCount(self, parent):
         return 1
 
     def data(self, index, role):
-        if self.sourceModel() is None:
-            return QtCore.QVariant()
-        
-        sIndex = self.mapToSource(index)
-        
-        return self.sourceModel().data(sIndex, role)
+        if self.sourceModel() is not None:
+            source_index = self.mapToSource(index)
+            return self.sourceModel().data(source_index, role)
 
     def flags(self, index):
         if self.sourceModel() is None or not index.isValid():  
