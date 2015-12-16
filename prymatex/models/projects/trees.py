@@ -384,10 +384,12 @@ class ProjectMenuProxyModel(QtCore.QSortFilterProxyModel):
     def setCurrentProject(self, project):
         self.currentProject = project
 
-    def filterAcceptsRow(self, sourceRow, sourceParent):
-        index = self.sourceModel().index(sourceRow, 0, sourceParent)
-        node = self.sourceModel().node(index)
-        return not node.isRootNode() and node.enabled()
+    def filterAcceptsRow(self, row, parent):
+        source_model = self.sourceModel()
+        index = source_model.index(row, 0, parent)
+        node = source_model.node(index)
+        item = node.bundleItem()
+        return not node.isRootNode() and item.enabled()
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):
         return True

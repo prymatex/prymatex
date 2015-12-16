@@ -24,7 +24,7 @@ from prymatex.utils.decorators import memoize
 from prymatex.models.process import ExternalProcessTableModel
 from prymatex.models.support import (BundleTreeModel, BundleItemTreeNode,
     ThemeStylesTableModel, ThemeStyleTableRow)
-from prymatex.models.support import (BundleItemProxyTreeModel, BundleItemTypeProxyModel, 
+from prymatex.models.support import (BundleItemProxyTreeModel, BundleItemTypeListModel, 
     ThemeStyleProxyTableModel, BundleListModel, SyntaxListModel,
     TemplateListModel, ProjectListModel)
 
@@ -75,15 +75,16 @@ class BundleItemMenuGroup(QtCore.QObject):
         menu.aboutToShow.connect(self.on_bundleMenu_aboutToShow)
         return menu
 
-    def addBundle(self, bundle):
+    def addBundle(self, node):
         """
             Add bundle to menu collection, all bundle has one QMenu in the collection
         """
-        menu = self.buildBundleMenu(bundle)
-        menu.menuAction().setVisible(bundle.enabled and bundle.bundleItem().mainMenu is not None)
+        item = node.bundleItem()
+        menu = self.buildBundleMenu(node)
+        menu.menuAction().setVisible(item.enabled() and item.mainMenu is not None)
         # Primero agregarlo a los containers porque estos usan self.menus para ordenar
         self.addToContainers(menu)
-        self.menus[bundle.uuid()] = menu
+        self.menus[node.uuid()] = menu
 
     def menuForBundle(self, bundle):
         return self.menus.get(bundle.uuid())
@@ -221,19 +222,19 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         self.syntaxProxyModel.setSourceModel(self.bundleModel)
         
         #INTERACTIVEITEMS
-        self.actionItemsProxyModel = BundleItemTypeProxyModel(["command", "snippet", "macro"], self)
+        self.actionItemsProxyModel = BundleItemTypeListModel(("command", "snippet", "macro"), self)
         self.actionItemsProxyModel.setSourceModel(self.bundleModel)
         
         #PREFERENCES
-        self.preferenceProxyModel = BundleItemTypeProxyModel("preference", self)
+        self.preferenceProxyModel = BundleItemTypeListModel(("preference", ), self)
         self.preferenceProxyModel.setSourceModel(self.bundleModel)
         
         #DRAGCOMMANDS
-        self.dragcommandProxyModel = BundleItemTypeProxyModel("dragcommand", self)
+        self.dragcommandProxyModel = BundleItemTypeListModel(("dragcommand", ), self)
         self.dragcommandProxyModel.setSourceModel(self.bundleModel)
         
         #THEMES
-        self.themeProxyModel = BundleItemTypeProxyModel("theme", self)
+        self.themeProxyModel = BundleItemTypeListModel(("theme", ), self)
         self.themeProxyModel.setSourceModel(self.bundleModel)
         
         #BUNDLEMENUGROUP

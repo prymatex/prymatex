@@ -222,17 +222,11 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
     def nodes(self):
         return [self.sourceModel().node(index) for index in self.__indexMap]
 
-    def filterAcceptsRow(self, sourceRow, sourceParent):
+    def filterAcceptsRow(self, row, parent):
         return True
         
-    def filterAcceptsColumn(self, sourceColumn, sourceParent):
+    def filterAcceptsColumn(self, column, parent):
         return True
-    
-    def comparableValue(self, index):
-        return 0
-        
-    def compareIndex(self, xindex, yindex):
-        return 0
     
     def mapToSource(self, index):
         return self.__indexMap[index.row()]
@@ -292,4 +286,8 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
                 self.endRemoveRows()
 
     def on_sourceModel_layoutChanged(self):
-        print("cambio el layout")
+        self.layoutAboutToBeChanged.emit()
+        start, end = self.index(0), self.index(len(self.__indexMap))
+        print("Update data")
+        self.changePersistentIndex(start, end)
+        self.layoutChanged.emit()

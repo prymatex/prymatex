@@ -116,14 +116,15 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
             if bundle.hasSource(project.namespaceName) and project.hasBundleMenu(bundle):
                 self.removeProjectBundleMenu(project, bundle)
 
-    def on_supportManager_bundleItemAdded(self, bundleItem):
-        if bundleItem.type() == "syntax":
-            self.keywordsListModel.addItems(bundleItem.bundleItem().scopeName.split('.'))
+    def on_supportManager_bundleItemAdded(self, node):
+        item = node.bundleItem()
+        if item.type() == "syntax":
+            self.keywordsListModel.addItems(item.scopeName.split('.'))
 
-
-    def on_supportManager_bundleItemRemoved(self, bundleItem):
-        if bundleItem.type() == "syntax":
-            self.keywordsListModel.removeItems(bundleItem.bundleItem().scopeName.split('.'))
+    def on_supportManager_bundleItemRemoved(self, node):
+        item = node.bundleItem()
+        if item.type() == "syntax":
+            self.keywordsListModel.removeItems(item.scopeName.split('.'))
 
     # -------------------- Load projects
     def loadProjects(self, message_handler=None, *args, **kwargs):

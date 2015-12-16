@@ -23,72 +23,15 @@ class BundleItemTreeNode(TreeNodeBase):
         self.__bundleItem = bundleItem
         self._icon = None
 
-    # ----------- Bundle Item assessors -----------
     def bundleItem(self):
         return self.__bundleItem
 
     def uuid(self):
         return self.__bundleItem.uuidAsText()
 
-    # ----------- Bundle Item decorator -----------
     def __hash__(self):
         return hash(self.uuid())
 
-    @property
-    def name(self):
-        return self.__bundleItem.name
-
-    @property
-    def bundle(self):
-        return self.__bundleItem.bundle
-
-
-    @property
-    def scopeName(self):
-        return self.__bundleItem.scopeName
-
-    @property
-    def selector(self):
-        return self.__bundleItem.selector
-
-    @property
-    def settings(self):
-        return self.__bundleItem.settings
-
-    @property
-    def grammar(self):
-        return self.__bundleItem.grammar
-
-    @property
-    def injectionSelector(self):
-        return self.__bundleItem.injectionSelector
-
-    @property
-    def patterns(self):
-        return self.__bundleItem.patterns
-
-    def type(self):
-        return self.__bundleItem.type()
-
-    def enabled(self):
-        return self.__bundleItem.enabled()
-
-    def execute(self, *args, **kwargs):
-        return self.__bundleItem.execute(*args, **kwargs)
-
-    def hasSource(self, *args, **kwargs):
-        return self.__bundleItem.hasSource(*args, **kwargs)
-
-    def addSource(self, *args, **kwargs):
-        return self.__bundleItem.addSource(*args, **kwargs)
-
-    def sourcePath(self, *args, **kwargs):
-        return self.__bundleItem.sourcePath(*args, **kwargs)
-
-    def setPopulated(self, *args, **kwargs):
-        return self.__bundleItem.setPopulated(*args, **kwargs)
-
-    # ----------- Bundle Item decoration -----------
     def keySequence(self):
         if hasattr(self.__bundleItem, "keyEquivalent") and isinstance(self.__bundleItem.keyEquivalent, six.string_types):
             return keyequivalent_to_keysequence(self.__bundleItem.keyEquivalent)

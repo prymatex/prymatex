@@ -8,24 +8,26 @@ from prymatex.core import config
 from prymatex.models.trees import FlatTreeProxyModel
 
 class BundleItemProxyTreeModel(QtCore.QSortFilterProxyModel):
-    bundleItemTypeOrder = ("bundle", "command", "dragcommand", "syntax",
+    DEFAULT = ("bundle", "command", "dragcommand", "syntax",
         "macro", "snippet", "preference", "template", "staticfile", "project")
     def __init__(self, manager, parent = None):
         super(BundleItemProxyTreeModel, self).__init__(parent)
         self.manager = manager
         self.namespaces = (config.PMX_NS_NAME, config.USR_NS_NAME)
-        self.bundleItemTypesFilter = self.bundleItemTypeOrder
+        self.sort_filter_order = self.DEFAULT
     
-    def filterAcceptsRow(self, sourceRow, sourceParent):
-        index = self.sourceModel().index(sourceRow, 0, sourceParent)
-        node = self.sourceModel().node(index)
-        if node.isRootNode() or not node.enabled():
+    def filterAcceptsRow(self, row, parent):
+        source_model = self.sourceModel()
+        index = source_model.index(row, 0, parent)
+        node = source_model.node(index)
+        item = node.bundleItem()
+        if node.isRootNode() or not item.enabled():
             return False
         if self.namespaces:
-            if not any([node.hasSource(ns) for ns in self.namespaces]):
+            if not any([item.hasSource(ns) for ns in self.namespaces]):
                 return False
-        if self.bundleItemTypesFilter:
-            if node.type() not in self.bundleItemTypesFilter:
+        if self.sort_filter_order:
+            if item.type() not in self.sort_filter_order:
                 return False
         regexp = self.filterRegExp()
         if not (regexp.isEmpty() or node.type() == "bundle"):
@@ -36,13 +38,15 @@ class BundleItemProxyTreeModel(QtCore.QSortFilterProxyModel):
         return True
         
     def lessThan(self, left, right):
-        leftNode = self.sourceModel().node(left)
-        rightNode = self.sourceModel().node(right)
-        if leftNode.type() == rightNode.type():
-            print(rightNode.name, leftNode.name, rightNode.name > leftNode.name)
-            return rightNode.name > leftNode.name
+        source_model = self.sourceModel()
+        left_node = source_model.node(left)
+        right_node = source_model.node(right)
+        left_item = left_node.bundleItem()
+        right_item = right_node.bundleItem()
+        if left_item.type() == right_item.type():
+            return right_node.nodeName() > left_node.nodeName()
         else:
-            return self.bundleItemTypeOrder.index(rightNode.type()) > self.bundleItemTypeOrder.index(leftNode.type())
+            return self.sort_filter_order.index(right_item.type()) > self.sort_filter_order.index(left_item.type())
     
     def setData(self, index, value, role):
         if role == QtCore.Qt.EditRole:  
@@ -69,33 +73,26 @@ class BundleItemProxyTreeModel(QtCore.QSortFilterProxyModel):
     
     def setFilterBundleItemType(self, bundleItemType):
         if isinstance(bundleItemType, (tuple, list)):
-            self.bundleItemTypesFilter = ("bundle") + tuple(bundleItemType)
+            self.sort_filter_order = ("bundle") + tuple(bundleItemType)
         else:
-            self.bundleItemTypesFilter = self.bundleItemTypeOrder
+            self.sort_filter_order = self.DEFAULT
         self.setFilterRegExp("")
 
-class BundleItemTypeProxyModel(FlatTreeProxyModel):
-    def __init__(self, tipos, parent = None):
-        super(BundleItemTypeProxyModel, self).__init__(parent)
-        self.tipos = tipos if isinstance(tipos, list) else [ tipos ]
-        
-    def filterAcceptsRow(self, sourceRow, sourceParent):
-        index = self.sourceModel().index(sourceRow, 0, sourceParent)
-        itemNode = self.sourceModel().node(index)
-        return itemNode.type() in self.tipos
-        
-    def comparableValue(self, index):
-        node = self.sourceModel().node(index)
-        return node.name.lower()
-    
-    def compareIndex(self, xindex, yindex):
-        xnode = self.sourceModel().node(xindex)
-        ynode = self.sourceModel().node(yindex)
-        return cmp(xnode.name, ynode.name)
-    
-class BundleListModel(BundleItemTypeProxyModel):
-    def __init__(self, parent = None):
-        BundleItemTypeProxyModel.__init__(self, 'bundle', parent)
+class BundleItemTypeListModel(FlatTreeProxyModel):
+    def __init__(self, types, parent=None):
+        super(BundleItemTypeListModel, self).__init__(parent)
+        self.types = types
+
+    def filterAcceptsRow(self, row, parent):
+        source_model = self.sourceModel()
+        index = source_model.index(row, 0, parent)
+        node = source_model.node(index)
+        item = node.bundleItem()
+        return item.type() in self.types
+
+class BundleListModel(BundleItemTypeListModel):
+    def __init__(self, parent=None):
+        BundleItemTypeListModel.__init__(self, ('bundle', ), parent)
     
     def data(self, index, role):
         if not index.isValid() or self.sourceModel() is None:
@@ -105,7 +102,7 @@ class BundleListModel(BundleItemTypeProxyModel):
             bundle = self.node(index)
             return QtCore.Qt.Checked if bundle.enabled() else QtCore.Qt.Unchecked
         else:
-            return BundleItemTypeProxyModel.data(self, index, role)
+            return BundleItemTypeListModel.data(self, index, role)
 
     def setData(self, index, value, role):
         if self.sourceModel() is None:
@@ -122,10 +119,10 @@ class BundleListModel(BundleItemTypeProxyModel):
     def flags(self, index):
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
     
-class SyntaxListModel(BundleItemTypeProxyModel):
+class SyntaxListModel(BundleItemTypeListModel):
     def __init__(self, parent = None):
-        BundleItemTypeProxyModel.__init__(self, 'syntax', parent)
-    
+        BundleItemTypeListModel.__init__(self, ('syntax', ), parent)
+
     def data(self, index, role):
         if not index.isValid() or self.sourceModel() is None:
             return None
@@ -141,9 +138,9 @@ class SyntaxListModel(BundleItemTypeProxyModel):
     def columnCount(self, parent):
         return 2
     
-class TemplateListModel(BundleItemTypeProxyModel):
+class TemplateListModel(BundleItemTypeListModel):
     def __init__(self, parent = None):
-        BundleItemTypeProxyModel.__init__(self, 'template', parent)
+        BundleItemTypeListModel.__init__(self, ('template', ), parent)
     
     def data(self, index, role):
         if not index.isValid() or self.sourceModel() is None:
@@ -152,17 +149,18 @@ class TemplateListModel(BundleItemTypeProxyModel):
         sIndex = self.mapToSource(index)
         
         if role == QtCore.Qt.DisplayRole and index.column() == 1:
-            template = self.sourceModel().node(sIndex)
-            return template.bundle.name
+            node = self.sourceModel().node(sIndex)
+            item = node.bundleItem()
+            return item.bundle.name
         elif index.column() == 0:
             return self.sourceModel().data(sIndex, role)
 
     def columnCount(self, parent):
         return 2
 
-class ProjectListModel(BundleItemTypeProxyModel):
+class ProjectListModel(BundleItemTypeListModel):
     def __init__(self, parent = None):
-        BundleItemTypeProxyModel.__init__(self, 'project', parent)
+        BundleItemTypeListModel.__init__(self, ('project', ), parent)
     
     def data(self, index, role):
         if not index.isValid() or self.sourceModel() is None:
@@ -171,8 +169,9 @@ class ProjectListModel(BundleItemTypeProxyModel):
         sIndex = self.mapToSource(index)
         
         if role == QtCore.Qt.DisplayRole and index.column() == 1:
-            template = self.sourceModel().node(sIndex)
-            return template.bundle.name
+            node = self.sourceModel().node(sIndex)
+            item = node.bundleItem()
+            return item.bundle.name
         elif index.column() == 0:
             return self.sourceModel().data(sIndex, role)
 
