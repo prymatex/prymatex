@@ -252,9 +252,10 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
     def getEditorBase(self):
         return self.editors[self.BASE_EDITOR]
 
-    def getEditorForTreeItem(self, treeItem):
-        if not treeItem.isRootNode() and treeItem.type() in self.indexes:
-            index = self.indexes[treeItem.type()]
+    def getEditorForTreeItem(self, node):
+        item = node.bundleItem()
+        if not node.isRootNode() and item.type() in self.indexes:
+            index = self.indexes[item.type()]
             return self.editors[index]
 
     def on_bundleTreeModel_rowsInserted(self, parent, start, end):
@@ -328,7 +329,7 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
         self.saveChanges()
         editor = self.getEditorForTreeItem(treeItem) if treeItem is not None else self.getEditorBase()
         if editor != None:
-            editor.edit(treeItem)
+            editor.edit(treeItem.bundleItem())
             self.setCurrentEditor(editor)
 
     def currentEditor(self):

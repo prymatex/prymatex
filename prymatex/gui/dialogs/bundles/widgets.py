@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
+from prymatex.qt.helpers import (keyequivalent_to_keysequence,
+    keysequence_to_keyequivalent)
 
 from prymatex.utils import json
-
+    
 from prymatex.ui.support.snippet import Ui_Snippet
 from prymatex.ui.support.command import Ui_Command
 from prymatex.ui.support.template import Ui_Template
@@ -33,15 +35,15 @@ class BundleItemEditorBaseWidget(QtWidgets.QWidget):
         return cls.TYPE
 
     def isChanged(self):
-        dataHash = self.bundleItem.dataHash()
-        return len(dataHash) != len(self.changes) or \
-            any([ dataHash[key] != self.changes[key] for key in dataHash.keys() ])
+        data_hash = self.bundleItem.dump()
+        return len(data_hash) != len(self.changes) or \
+            any([ data_hash[key] != self.changes[key] for key in data_hash.keys() ])
     
     def title(self):
         if self.bundleItem is not None:
             return 'Edit %s: "%s"' % (self.type(), self.bundleItem.name)
         return 'No item selected'
-    
+
     def getName(self):
         return self.changes.get('name', None)
     
@@ -61,10 +63,12 @@ class BundleItemEditorBaseWidget(QtWidgets.QWidget):
         self.changes['tabTrigger'] = value
     
     def getKeySequence(self):
-        return self.changes.get('keySequence', None)
+        key_equivalent = self.changes.get('keyEquivalent', None)
+        if key_equivalent is not None:
+            return keyequivalent_to_keysequence(key_equivalent)
     
     def setKeySequence(self, value):
-        self.changes['keySequence'] = value
+        self.changes['keyEquivalent'] = value and keysequence_to_keyequivalent(value) or None
     
     def getSemanticClass(self):
         return self.changes.get('semanticClass', None)
@@ -72,13 +76,11 @@ class BundleItemEditorBaseWidget(QtWidgets.QWidget):
     def setSemanticClass(self, value):
         self.changes['semanticClass'] = value
 
-    def edit(self, bundleItem):
-        self.bundleItem = bundleItem
-        self.changes = bundleItem and bundleItem.dataHash() or {}
+    def edit(self, bundle_item):
+        self.bundleItem = bundle_item
+        self.changes = self.bundleItem.dump()
 
-#============================================================
-# None Widget
-#============================================================
+# ------------- None Widget
 class NoneEditorWidget(BundleItemEditorBaseWidget):
     def __init__(self, parent = None):
         BundleItemEditorBaseWidget.__init__(self, parent)
@@ -94,7 +96,7 @@ class NoneEditorWidget(BundleItemEditorBaseWidget):
         self.label = QtWidgets.QLabel(widget)
         self.label.setEnabled(False)
         self.label.setText("")
-        self.label.setPixmap(self.parent().resources().get_image("prymo"))
+        self.label.setPixmap(self.parent().resources().get_image(":/prymo.png"))
         self.label.setScaledContents(True)
         self.label.setObjectName("labelPrymo")
         self.gridLayout.addWidget(self.label, 1, 1, 1, 1)
@@ -107,9 +109,7 @@ class NoneEditorWidget(BundleItemEditorBaseWidget):
         spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem3, 1, 0, 1, 1)
 
-#============================================================
-# Snippet Editor Widget
-#============================================================
+# ----------------------- Snippet Editor Widget
 class SnippetEditorWidget(BundleItemEditorBaseWidget, Ui_Snippet):
     TYPE = 'snippet'
 
@@ -131,10 +131,11 @@ class SnippetEditorWidget(BundleItemEditorBaseWidget, Ui_Snippet):
     def getKeySequence(self):
         return super(SnippetEditorWidget, self).getKeySequence() or ""
     
-    def edit(self, bundleItem):
-        super(SnippetEditorWidget, self).edit(bundleItem)
+    def edit(self, bundle_item):
+        super(SnippetEditorWidget, self).edit(bundle_item)
         self.content.setPlainText(self.changes["content"])
 
+# ----------------------- Command Editor Widget
 class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
     TYPE = 'command'
     
@@ -251,8 +252,8 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
     def getSemanticClass(self):
         return super(CommandEditorWidget, self).getSemanticClass() or ""
     
-    def edit(self, bundleItem):
-        super(CommandEditorWidget, self).edit(bundleItem)
+    def edit(self, bundle_item):
+        super(CommandEditorWidget, self).edit(bundle_item)
         #Command
         self.command.setPlainText(self.changes["command"])
         
@@ -311,8 +312,8 @@ class TemplateEditorWidget(BundleItemEditorBaseWidget, Ui_Template):
         else:
             self.changes.pop('extension', None)
     
-    def edit(self, bundleItem):
-        super(TemplateEditorWidget, self).edit(bundleItem)
+    def edit(self, bundle_item):
+        super(TemplateEditorWidget, self).edit(bundle_item)
         self.command.setPlainText(self.changes['command'])
         self.lineEditExtension.setText(self.changes['extension'])
 
@@ -340,8 +341,8 @@ class StaticFileEditorWidget(BundleItemEditorBaseWidget, Ui_TemplateFile):
     def getSemanticClass(self):
         return None
     
-    def edit(self, bundleItem):
-        super(StaticFileEditorWidget, self).edit(bundleItem)
+    def edit(self, bundle_item):
+        super(StaticFileEditorWidget, self).edit(bundle_item)
         self.content.setPlainText(self.changes['content'])
     
 class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
@@ -364,8 +365,8 @@ class DragCommandEditorWidget(BundleItemEditorBaseWidget, Ui_DragCommand):
     def getScope(self):
         return super(DragCommandEditorWidget, self).getScope() or ""
         
-    def edit(self, bundleItem):
-        BundleItemEditorBaseWidget.edit(self, bundleItem)
+    def edit(self, bundle_item):
+        BundleItemEditorBaseWidget.edit(self, bundle_item)
         self.command.setPlainText(self.changes['command'])
         self.lineEditExtensions.setText(", ".join(self.changes['draggedFileExtensions']))
 
@@ -387,16 +388,15 @@ class LanguageEditorWidget(BundleItemEditorBaseWidget, Ui_Language):
     def getKeySequence(self):
         return super(LanguageEditorWidget, self).getKeySequence() or ""
     
-    def edit(self, bundleItem):
-        BundleItemEditorBaseWidget.edit(self, bundleItem)
+    def edit(self, bundle_item):
+        BundleItemEditorBaseWidget.edit(self, bundle_item)
         self.changes = {
             "name" : self.changes.pop("name"),
             "uuid" : self.changes.pop("uuid"),
-            "scope": self.changes.pop("scope"),
-            "semanticClass": self.changes.pop("semanticClass"),
-            "tabTrigger": self.changes.pop("tabTrigger"),
-            "keySequence": self.changes.pop("keySequence"),
-            "keyEquivalent": self.changes.pop("keyEquivalent"),
+            "scope": self.changes.pop("scope", ""),
+            "semanticClass": self.changes.pop("semanticClass", ""),
+            "tabTrigger": self.changes.pop("tabTrigger", ""),
+            "keyEquivalent": self.changes.pop("keyEquivalent", ""),
             "grammar": self.changes
         }
         self.content.setPlainText(json.dumps(self.changes["grammar"]))
@@ -415,8 +415,8 @@ class PreferenceEditorWidget(BundleItemEditorBaseWidget, Ui_Preference):
     def getScope(self):
         return super(PreferenceEditorWidget, self).getScope() or ""
     
-    def edit(self, bundleItem):
-        BundleItemEditorBaseWidget.edit(self, bundleItem)
+    def edit(self, bundle_item):
+        BundleItemEditorBaseWidget.edit(self, bundle_item)
         self.settings.setPlainText(json.dumps(self.changes['settings']))
 
 class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):
@@ -434,8 +434,8 @@ class MacroEditorWidget(BundleItemEditorBaseWidget, Ui_Macro):
         else:
             self.argument.clear()
 
-    def edit(self, bundleItem):
-        BundleItemEditorBaseWidget.edit(self, bundleItem)
+    def edit(self, bundle_item):
+        BundleItemEditorBaseWidget.edit(self, bundle_item)
         self.listActionWidget.clear()
         self.argument.clear()
         for command in self.changes["commands"]:
@@ -470,9 +470,9 @@ class BundleEditorWidget(BundleItemEditorBaseWidget, Ui_Menu):
     def getSemanticClass(self):
         return None
     
-    def edit(self, bundleItem):
-        BundleItemEditorBaseWidget.edit(self, bundleItem)
-        self.treeMenuModel.setBundle(bundleItem)
+    def edit(self, bundle_item):
+        BundleItemEditorBaseWidget.edit(self, bundle_item)
+        self.treeMenuModel.setBundle(bundle_item)
 
 class ProjectEditorWidget(BundleItemEditorBaseWidget, Ui_Project):
     TYPE = 'project'
@@ -485,6 +485,6 @@ class ProjectEditorWidget(BundleItemEditorBaseWidget, Ui_Project):
     def on_command_textChanged(self):
         self.changes['command'] = self.command.toPlainText()
     
-    def edit(self, bundleItem):
-        BundleItemEditorBaseWidget.edit(self, bundleItem)
+    def edit(self, bundle_item):
+        BundleItemEditorBaseWidget.edit(self, bundle_item)
         self.command.setPlainText(self.cahnges['command'])
