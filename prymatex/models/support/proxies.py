@@ -71,9 +71,9 @@ class BundleItemProxyTreeModel(QtCore.QSortFilterProxyModel):
             self.namespaces = (config.PMX_NS_NAME, config.USR_NS_NAME)
         self.setFilterRegExp("")
     
-    def setFilterBundleItemType(self, bundleItemType):
-        if isinstance(bundleItemType, (tuple, list)):
-            self.sort_filter_order = ("bundle") + tuple(bundleItemType)
+    def setFilterBundleItemTypes(self, types):
+        if isinstance(types, (tuple, list)):
+            self.sort_filter_order = ("bundle") + tuple(types)
         else:
             self.sort_filter_order = self.DEFAULT
         self.setFilterRegExp("")
