@@ -296,9 +296,8 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return environment
 
     def loadSupport(self, message_handler):
-        self.bundleProxyTreeModel.setDynamicSortFilter(True)
         SupportBaseManager.loadSupport(self, message_handler)
-        #self.bundleProxyTreeModel.sort(0, QtCore.Qt.AscendingOrder)
+        self.bundleProxyTreeModel.sort(0, QtCore.Qt.AscendingOrder)
 
     def runSystemCommand(self, **attrs):
         if attrs.get("asynchronous", False):
@@ -355,9 +354,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
 
     #--------------- MANAGED OBJECTS OVERRIDE INTERFACE
     def setDeleted(self, uuid):
-        """
-        Marcar un managed object como eliminado
-        """
+        """Marcar un managed object como eliminado"""
         if isinstance(uuid, uuidmodule.UUID):
             uuid = self.uuidtotext(uuid)
         self.deletedObjects.append(uuid)
@@ -413,9 +410,6 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         self.bundleModel.removeBundle(bundle)
         self.bundleRemoved.emit(bundle)
     
-    def getAllBundles(self):
-        return self.bundleProxyModel.nodes()
-    
     def getDefaultBundle(self):
         return self.getManagedObjectNode(self.defaultBundleForNewBundleItems)
     
@@ -433,20 +427,15 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         self.bundleModel.appendBundleItem(bundle_item_node, bundle_node)
         self.bundleItemAdded.emit(bundle_item_node)
 
-    def modifyBundleItem(self, bundleItem):
-        self.bundleItemChanged.emit(bundleItem)
+    def onBundleItemModified(self, bundle_item):
+        bundle_item_node = self.getManagedObjectNode(bundle_item.uuid)
+        self.bundleItemChanged.emit(bundle_item_node)
         
-    def removeBundleItem(self, bundleItem):
-        self.bundleModel.removeBundleItem(bundleItem)
-        self.bundleItemRemoved.emit(bundleItem)
-        
-    def getAllBundleItems(self):
-        nodes = []
-        for bundle in self.getAllBundles():
-            for node in bundle.children():
-                nodes.append(node)
-        return nodes
-
+    def onBundleItemRemoved(self, bundle_item):
+        bundle_item_node = self.getManagedObjectNode(bundle_item.uuid)
+        self.bundleModel.removeBundleItem(bundle_item_node)
+        self.bundleItemRemoved.emit(bundle_item_node)
+    
     # ----------------- THEME INTERFACE
     def getThemePalette(self, theme, scope=None):
         settings = self.getThemeSettings(theme, scope)
@@ -522,7 +511,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     # STATICFILE OVERRIDE INTERFACE
     def onStaticFileAdded(self, static_file):
         static_file_node = BundleItemTreeNode(static_file)
-        bundle_item_node = self.getBundleItem(static_file.parentItem.uuid)
+        bundle_item_node = self.getManagedObjectNode(static_file.parentItem.uuid)
         self.bundleModel.appendStaticFile(static_file_node, bundle_item_node)
     
     def removeStaticFile(self, file):
