@@ -231,7 +231,9 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
 
     def on_comboBoxOutputLocation_changed(self, index):
         value = self.comboBoxOutputLocation.itemData(index)
-        outputKey = "outputLocation" if self.changes["version"] == 2 else "output"
+        outputKey = "outputLocation" \
+            if self.changes.get("version", 1) == 2 \
+            else "output"
         self.changes[outputKey] = value
     
     def on_comboBoxOutputFormat_changed(self, index):
@@ -268,12 +270,14 @@ class CommandEditorWidget(BundleItemEditorBaseWidget, Ui_Command):
             self.comboBoxInput.setCurrentIndex(index)
     
         #Output
-        outputKey = "outputLocation" if self.changes["version"] == 2 else "output"
+        outputKey = "outputLocation" \
+            if self.changes.get("version", 1) == 2 \
+            else "output"
         index = self.comboBoxOutputLocation.findData(self.changes[outputKey])
         if index != -1:
             self.comboBoxOutputLocation.setCurrentIndex(index)
     
-        if self.changes["version"] == 2:
+        if self.changes.get("version", 1) == 2:
             #Input Format
             index = self.comboBoxInputFormat.findData(self.changes["inputFormat"])
             if index != -1:

@@ -66,7 +66,7 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
         # Set namespace and filters
         self.namespace = namespaces and namespaces[0] or config.USR_NS_NAME
         self.proxyTreeModel.setFilterNamespace(namespaces)
-        self.proxyTreeModel.setFilterBundleItemType(types)
+        self.proxyTreeModel.setFilterBundleItemTypes(types)
         index = self.comboBoxItemFilter.findData(types)
         self.comboBoxItemFilter.setCurrentIndex(index)
         
@@ -74,13 +74,13 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
         self.exec_()
 
     def execCommand(self):
-        return self.execEditor("command")
+        return self.execEditor(("command",))
 
     def execLanguage(self):
-        return self.execEditor("syntax")
+        return self.execEditor(("syntax",))
 
     def execSnippet(self):
-        return self.execEditor("snippet")
+        return self.execEditor(("snippet",))
 
     def configEditorWidgets(self):
         self.stackedWidget = QtWidgets.QStackedWidget()
@@ -227,13 +227,13 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
 
     # ------------------- Filter bundle items
     def on_comboBoxItemFilter_returnPressed(self):
-        self.proxyTreeModel.setFilterBundleItemType(None)
+        self.proxyTreeModel.setFilterBundleItemTypes(None)
         self.proxyTreeModel.setFilterRegExp(".*%s.*" % self.comboBoxItemFilter.currentText())
 
     @QtCore.Slot(int)
     def on_comboBoxItemFilter_activated(self, index):
         value = self.comboBoxItemFilter.itemData(index)
-        self.proxyTreeModel.setFilterBundleItemType(value)
+        self.proxyTreeModel.setFilterBundleItemTypes((value, ))
 
     def configSelectTop(self):
         self.comboBoxItemFilter.addItem("Show all")
