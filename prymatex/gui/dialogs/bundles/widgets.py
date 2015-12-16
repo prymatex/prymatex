@@ -15,7 +15,7 @@ from prymatex.ui.support.templatefile import Ui_TemplateFile
 from prymatex.ui.support.preference import Ui_Preference
 from prymatex.ui.support.macro import Ui_Macro
 from prymatex.ui.support.project import Ui_Project
-from prymatex.models.support import BundleItemMenuTreeModel
+from prymatex.models.support import BundleMenuTreeModel
 
 class BundleItemEditorBaseWidget(QtWidgets.QWidget):
     '''Base class for editors'''
@@ -449,7 +449,7 @@ class BundleEditorWidget(BundleItemEditorBaseWidget, Ui_Menu):
         self.setupUi(self)
         manager = parent.manager
 
-        self.treeMenuModel = BundleItemMenuTreeModel(manager)
+        self.treeMenuModel = BundleMenuTreeModel(manager)
         self.treeMenuView.setModel(self.treeMenuModel)
         self.listExcludedView.setModel(self.treeMenuModel.excludedListModel())
 

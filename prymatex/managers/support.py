@@ -22,7 +22,7 @@ from prymatex.utils import encoding
 from prymatex.utils.decorators import memoize
 
 from prymatex.models.process import ExternalProcessTableModel
-from prymatex.models.support import (BundleItemTreeModel, BundleItemTreeNode,
+from prymatex.models.support import (BundleTreeModel, BundleItemTreeNode,
     ThemeStylesTableModel, ThemeStyleTableRow)
 from prymatex.models.support import (BundleItemProxyTreeModel, BundleItemTypeProxyModel, 
     ThemeStyleProxyTableModel, BundleListModel, SyntaxListModel,
@@ -192,7 +192,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def __init__(self, **kwargs):
         super(SupportManager, self).__init__(**kwargs)
 
-        self.bundleTreeModel = BundleItemTreeModel(self)
+        self.bundleModel = BundleTreeModel(self)
         self.themeStylesTableModel = ThemeStylesTableModel(self)
         self.processTableModel = ExternalProcessTableModel(self)
 
@@ -202,39 +202,39 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
 
         #TREE PROXY
         self.bundleProxyTreeModel = BundleItemProxyTreeModel(self)
-        self.bundleProxyTreeModel.setSourceModel(self.bundleTreeModel)
+        self.bundleProxyTreeModel.setSourceModel(self.bundleModel)
 
         #BUNDLES
         self.bundleProxyModel = BundleListModel(self)
-        self.bundleProxyModel.setSourceModel(self.bundleTreeModel)
+        self.bundleProxyModel.setSourceModel(self.bundleModel)
         
         #TEMPLATES
         self.templateProxyModel = TemplateListModel(self)
-        self.templateProxyModel.setSourceModel(self.bundleTreeModel)
+        self.templateProxyModel.setSourceModel(self.bundleModel)
         
         #PROJECTS
         self.projectProxyModel = ProjectListModel(self)
-        self.projectProxyModel.setSourceModel(self.bundleTreeModel)
+        self.projectProxyModel.setSourceModel(self.bundleModel)
 
         #SYNTAX
         self.syntaxProxyModel = SyntaxListModel(self)
-        self.syntaxProxyModel.setSourceModel(self.bundleTreeModel)
+        self.syntaxProxyModel.setSourceModel(self.bundleModel)
         
         #INTERACTIVEITEMS
         self.actionItemsProxyModel = BundleItemTypeProxyModel(["command", "snippet", "macro"], self)
-        self.actionItemsProxyModel.setSourceModel(self.bundleTreeModel)
+        self.actionItemsProxyModel.setSourceModel(self.bundleModel)
         
         #PREFERENCES
         self.preferenceProxyModel = BundleItemTypeProxyModel("preference", self)
-        self.preferenceProxyModel.setSourceModel(self.bundleTreeModel)
+        self.preferenceProxyModel.setSourceModel(self.bundleModel)
         
         #DRAGCOMMANDS
         self.dragcommandProxyModel = BundleItemTypeProxyModel("dragcommand", self)
-        self.dragcommandProxyModel.setSourceModel(self.bundleTreeModel)
+        self.dragcommandProxyModel.setSourceModel(self.bundleModel)
         
         #THEMES
         self.themeProxyModel = BundleItemTypeProxyModel("theme", self)
-        self.themeProxyModel.setSourceModel(self.bundleTreeModel)
+        self.themeProxyModel.setSourceModel(self.bundleModel)
         
         #BUNDLEMENUGROUP
         self.bundleMenuGroup = BundleItemMenuGroup(self)
@@ -392,24 +392,24 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         if isinstance(uuid, uuidmodule.UUID):
             uuid = self.uuidtotext(uuid)
         if not self.isDeleted(uuid):
-            indexes = self.bundleTreeModel.match(self.bundleTreeModel.index(0, 0, QtCore.QModelIndex()), 
+            indexes = self.bundleModel.match(self.bundleModel.index(0, 0, QtCore.QModelIndex()), 
                 QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive)
             if indexes:
-                return self.bundleTreeModel.node(indexes[0])
+                return self.bundleModel.node(indexes[0])
 
     # -------------------- BUNDLE INTERFACE 
     def onBundleAdded(self, bundle):
         bundle_node = BundleItemTreeNode(bundle)
         icon = self.resources().get_icon("bundle-item-%s" % bundle.type())
         bundle_node.setIcon(icon)
-        self.bundleTreeModel.appendBundle(bundle_node)
+        self.bundleModel.appendBundle(bundle_node)
         self.bundleAdded.emit(bundle_node)
     
     def modifyBundle(self, bundle):
         self.bundleChanged.emit(bundle)
     
     def removeBundle(self, bundle):
-        self.bundleTreeModel.removeBundle(bundle)
+        self.bundleModel.removeBundle(bundle)
         self.bundleRemoved.emit(bundle)
     
     def getAllBundles(self):
@@ -429,14 +429,14 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         bundle_node = self.getManagedObjectNode(bundle_item.bundle.uuid)
         icon = self.resources().get_icon("bundle-item-%s" % bundle_item.type())
         bundle_item_node.setIcon(icon)
-        self.bundleTreeModel.appendBundleItem(bundle_item_node, bundle_node)
+        self.bundleModel.appendBundleItem(bundle_item_node, bundle_node)
         self.bundleItemAdded.emit(bundle_item_node)
 
     def modifyBundleItem(self, bundleItem):
         self.bundleItemChanged.emit(bundleItem)
         
     def removeBundleItem(self, bundleItem):
-        self.bundleTreeModel.removeBundleItem(bundleItem)
+        self.bundleModel.removeBundleItem(bundleItem)
         self.bundleItemRemoved.emit(bundleItem)
         
     def getAllBundleItems(self):
@@ -522,7 +522,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def onStaticFileAdded(self, static_file):
         static_file_node = BundleItemTreeNode(static_file)
         bundle_item_node = self.getBundleItem(static_file.parentItem.uuid)
-        self.bundleTreeModel.appendStaticFile(static_file_node, bundle_item_node)
+        self.bundleModel.appendStaticFile(static_file_node, bundle_item_node)
     
     def removeStaticFile(self, file):
         pass
@@ -533,7 +533,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
 
     # THEME STYLE INTERFACE
     def getThemeStyleNode(self, uuid):
-        indexes = self.themeStylesTableModel.match(self.bundleTreeModel.index(0, 0, QtCore.QModelIndex()),
+        indexes = self.themeStylesTableModel.match(self.bundleModel.index(0, 0, QtCore.QModelIndex()),
             QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive)
         if indexes:
             return self.themeStylesTableModel.style(indexes[0])

@@ -9,12 +9,10 @@ from prymatex.models.trees import AbstractTreeModel
 from prymatex.models.support.nodes import BundleItemTreeNode, BundleItemMenuTreeNode
 from prymatex.models.support.lists import BundleItemExcludedListModel
 
-#====================================================
-# Bundle Tree Model
-#====================================================
-class BundleItemTreeModel(AbstractTreeModel): 
-    def __init__(self, manager = None, **kwargs):
-        super(BundleItemTreeModel, self).__init__(**kwargs)
+# ------------------ Bundle Model
+class BundleTreeModel(AbstractTreeModel): 
+    def __init__(self, manager=None, **kwargs):
+        super(BundleTreeModel, self).__init__(**kwargs)
         self.manager = manager
         self.manager.bundleChanged.connect(self.on_manager_bundleItemChanged)
         self.manager.bundleItemChanged.connect(self.on_manager_bundleItemChanged)
@@ -79,14 +77,12 @@ class BundleItemTreeModel(AbstractTreeModel):
     def removeStaticFile(self, staticFile):
         self.removeNode(static_file, bundle_item)
 
-#===============================================
-# Bundle Menu Tree Model
-#===============================================
-class BundleItemMenuTreeModel(AbstractTreeModel):
+# ----------------- Bundle Menu Tree Model
+class BundleMenuTreeModel(AbstractTreeModel):
     menuChanged = QtCore.Signal()
     
     def __init__(self, manager, **kwargs):
-        super(BundleItemMenuTreeModel, self).__init__(**kwargs)
+        super(BundleMenuTreeModel, self).__init__(**kwargs)
         self.excludedModel = BundleItemExcludedListModel(manager, self)
         self.manager = manager
     

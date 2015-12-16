@@ -40,9 +40,7 @@ class CodeEditorSideBar(QtWidgets.QWidget):
         for index in range(self.horizontalLayout.count()):
             self.horizontalLayout.itemAt(index).widget().scroll(*largs)
 
-#========================================
-# BASE EDITOR SIDEBAR ADDON
-#========================================
+# ----------------- BASE EDITOR SIDEBAR ADDON
 class SideBarWidgetMixin(PrymatexEditorAddon):
     ALIGNMENT = None
 
@@ -55,9 +53,7 @@ class SideBarWidgetMixin(PrymatexEditorAddon):
         self.boldFont = QtGui.QFont(font)
         self.boldFont.setBold(True)
 
-#=======================================
-# SideBar Widgets
-#=======================================
+# ------------------- SideBar Widgets
 class LineNumberSideBarAddon(SideBarWidgetMixin, QtWidgets.QWidget):
     ALIGNMENT = QtCore.Qt.AlignLeft
     MARGIN = 2
