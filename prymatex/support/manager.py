@@ -322,7 +322,7 @@ class SupportBaseManager(object):
                     self.logger().debug("Bundle %s removed." % bundle.name)
                     for item in bundleItems:
                         self.removeManagedObject(item)
-                        self.removeBundleItem(item)
+                        self.onBundleItemRemoved(item)
                     self.removeManagedObject(bundle)
                     self.removeBundle(bundle)
                 else:
@@ -351,14 +351,14 @@ class SupportBaseManager(object):
                     if item_source == bundleItem.currentSource() and item_source.hasChanged():
                         self.logger().debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, item_source.path))
                         self.loadBundleItem(self.BUNDLEITEM_CLASSES[bundleItem.type()], item_source, bundle)
-                        self.modifyBundleItem(bundleItem)
+                        self.onBundleItemModified(bundleItem)
                     paths_to_find[bundleItem.type()].remove(item_source.path)
                 else:
                     bundleItem.removeSource(namespace.name)
                     if not bundleItem.hasSources():
                         self.logger().debug("Bundle Item %s removed." % bundleItem.name)
                         self.removeManagedObject(bundleItem)
-                        self.removeBundleItem(bundleItem)
+                        self.onBundleItemRemoved(bundleItem)
                     else:
                         bundleItem.setDirty()
             for itemType, itemPaths in paths_to_find.items():
@@ -582,10 +582,10 @@ class SupportBaseManager(object):
     def onBundleItemAdded(self, bundle_item):
         pass
 
-    def modifyBundleItem(self, bundle_item):
+    def onBundleItemModified(self, bundle_item):
         pass
 
-    def removeBundleItem(self, bundle_item):
+    def onBundleItemRemoved(self, bundle_item):
         pass
 
     def getAllBundleItems(self):
@@ -664,7 +664,7 @@ class SupportBaseManager(object):
             bundleItem.setSource(item_source)
 
         self.saveManagedObject(bundleItem, item_source)
-        self.modifyBundleItem(bundleItem)
+        self.onBundleItemModified(bundleItem)
         return bundleItem
 
     def deleteBundleItem(self, bundleItem):
@@ -681,7 +681,7 @@ class SupportBaseManager(object):
                 self.deleteManagedObject(bundleItem, namespace)
 
         self.removeManagedObject(bundleItem)
-        self.removeBundleItem(bundleItem)
+        self.onBundleItemRemoved(bundleItem)
 
     # ----------------- THEME INTERFACE
     def getTheme(self, uuid):
@@ -742,7 +742,7 @@ class SupportBaseManager(object):
             path = osextra.path.ensure_not_exists(os.path.join(parentItem.path(namespace), "%s"), osextra.to_valid_name(attrs["name"]))
             staticFile.relocate(path)
         staticFile.update(attrs)
-        self.modifyBundleItem(staticFile)
+        self.onBundleItemModified(staticFile)
         return staticFile
 
     def deleteStaticFile(self, staticFile):
@@ -783,7 +783,7 @@ class SupportBaseManager(object):
         # Do update and save
         style.update(attrs)
         self.saveManagedObject(theme, namespace)
-        self.modifyBundleItem(theme)
+        self.onBundleItemModified(theme)
         return style
 
     def deleteThemeStyle(self, style, ns_name=config.USR_NS_NAME):
