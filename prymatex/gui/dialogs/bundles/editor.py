@@ -233,18 +233,18 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
     @QtCore.Slot(int)
     def on_comboBoxItemFilter_activated(self, index):
         value = self.comboBoxItemFilter.itemData(index)
-        self.proxyTreeModel.setFilterBundleItemTypes((value, ))
+        self.proxyTreeModel.setFilterBundleItemTypes(value)
 
     def configSelectTop(self):
-        self.comboBoxItemFilter.addItem("Show all")
-        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-syntax"), "Languages", "syntax")
-        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-snippet"), "Snippets", "snippet")
-        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-macro"), "Macros", "macro")
-        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-command"), "Commands", "command")
-        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-dragcommand"), "DragCommands", "dragcommand")
-        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-preference"), "Preferences", "preference")
-        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-template"), "Templates", "template staticfile")
-        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-project"), "Projects", "project staticfile")
+        self.comboBoxItemFilter.addItem("Show all", ())
+        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-syntax"), "Languages", ("syntax",))
+        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-snippet"), "Snippets", ("snippet",))
+        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-macro"), "Macros", ("macro",))
+        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-command"), "Commands", ("command",))
+        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-dragcommand"), "DragCommands", ("dragcommand",))
+        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-preference"), "Preferences", ("preference",))
+        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-template"), "Templates", ("template", "staticfile"))
+        self.comboBoxItemFilter.addItem(self.resources().get_icon("bundle-item-project"), "Projects", ("project", "staticfile"))
         self.comboBoxItemFilter.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
         self.comboBoxItemFilter.lineEdit().returnPressed.connect(self.on_comboBoxItemFilter_returnPressed)
 
