@@ -888,7 +888,7 @@ class SupportBaseManager(object):
     # ----------------- TABTRIGGERS INTERFACE
     def getAllTabTriggerItems(self):
         """Return a list of all tab triggers items"""
-        return [ item for item in self.getAllActionItems() if item.tabTrigger is not None ]
+        return [ item for item in self.getAllActionItems() if item.tabTrigger ]
 
     def getAllBundleItemsByTabTrigger(self, tab_trigger):
         """Return a list of tab triggers bundle items"""
@@ -920,12 +920,12 @@ class SupportBaseManager(object):
     # -------------- KEYEQUIVALENT INTERFACE
     def getAllKeyEquivalentItems(self):
         """Return a list of all key equivalent items"""
-        return [ item for item in self.getAllActionItems() if item.keyEquivalent is not None ] + \
-            [ item for item in self.getAllSyntaxes() if item.keyEquivalent is not None ]
+        return [ item for item in self.getAllActionItems() if item.keyEquivalent ] + \
+            [ item for item in self.getAllSyntaxes() if item.keyEquivalent ]
 
     def getAllBundleItemsByKeyEquivalent(self, key_equivalent):
         """Return a list of key equivalent bundle items"""
-        return [ item for item in self.getAllKeyEquivalentItems() if set(item.keyEquivalent) == set(key_equivalent) ]
+        return [ item for item in self.getAllKeyEquivalentItems() if item.keyEquivalent == key_equivalent ]
 
     #-------------- KEYEQUIVALENT ------------------------
     def getAllKeyEquivalentMnemonic(self):

@@ -81,9 +81,10 @@ def keysequence_to_keyequivalent(sequence):
             nemonic.append("".join(seq))
         else:
             #Seguro que apreto shift
-            shift, code = _keyboard_layout_keys(key)
+            shift, code = _keyboard_layout_keys(seq[-1])
             if shift:
                 seq.remove("$")
+                seq[-1] = code
                 nemonic.append("".join(seq))
             else:
                 for orig, qtcode in QTCHARCODES.items():

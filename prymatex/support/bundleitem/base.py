@@ -56,9 +56,6 @@ class BundleItem(ManagedObject):
     # ---------------- Environment Variables
     def environmentVariables(self):
         return self.bundle.environmentVariables()
-
-    def keyCode(self):
-        return self.keyEquivalent
     
     # ---------------- The executor method
     def execute(self, processor):

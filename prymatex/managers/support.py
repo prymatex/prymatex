@@ -522,8 +522,8 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         return [ keyequivalent_to_keysequence(mnemonic) for mnemonic in self.getAllKeyEquivalentMnemonic() ]
 
     def getKeySequenceItem(self, sequence, left_scope, right_scope):
-        print(sequence, left_scope, right_scope)
-        print(sequence.toString(), keysequence_to_keyequivalent(sequence))
+        eq = keysequence_to_keyequivalent(sequence)
+        print("seq", sequence.count(), "equivalente", type(eq), eq)
         return self.getKeyEquivalentItem(keysequence_to_keyequivalent(sequence), left_scope, right_scope)
         
     # THEME STYLE INTERFACE

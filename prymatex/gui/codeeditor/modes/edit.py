@@ -28,7 +28,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
 
         # Bundle items 
         sequence = keyevent_to_keysequence(event)
-        print(sequence.toString())
         if sequence in self.application().supportManager.getAllKeySequences():
             yield lambda event, sequence=sequence: \
                 self.__insert_key_bundle_item(event, sequence)
@@ -52,7 +51,6 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         leftScope, rightScope = self.editor.scope(self.editor.textCursor())
         items = self.application().supportManager.getKeySequenceItem(
             sequence, leftScope, rightScope)
-        return False
         self.editor.insertBundleItem(items)
         return bool(items)
     

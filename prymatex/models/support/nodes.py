@@ -63,7 +63,7 @@ class BundleItemTreeNode(TreeNodeBase):
                 return name[0:index] + '&' + name[index:]
         return name
     
-    def buildMenuTextEntry(self, mnemonic = True):
+    def buildMenuTextEntry(self, mnemonic=True):
         text = self.nodeName()
         if mnemonic:
             text += "\t%s" % (self.trigger())

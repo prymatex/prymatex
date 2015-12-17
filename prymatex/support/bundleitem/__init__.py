@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from .base import BundleItem
 from .syntax import Syntax
 from .snippet import Snippet
 from .macro import Macro

@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import re
 import operator
+from functools import reduce
 
 from prymatex.qt import QtCore, QtGui, Qt, QtWidgets, API
 
@@ -15,10 +16,10 @@ from prymatex.widgets.texteditor import TextEditWidget
 from prymatex.widgets.texteditor import CompletionWidget
 
 from prymatex.qt.helpers import (extend_menu, keyevent_to_keysequence, keyevent_to_tuple)
+from prymatex.support import BundleItem
 from prymatex.models.support import BundleItemTreeNode
 from prymatex.utils import text, encoding
 from prymatex.utils.i18n import ugettext as _
-from functools import reduce
 
 from .addons import CodeEditorAddon
 from .sidebar import CodeEditorSideBar, SideBarWidgetMixin
@@ -962,7 +963,7 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         if len(items) > 1:
             syntax = any((item.type() == 'syntax' for item in items))
 
-            self.showFlatPopupMenu(items, _insert_item, cursorPosition = not syntax)
+            self.showFlatPopupMenu(items, _insert_item, cursorPosition=not syntax)
         elif items:
             _insert_item(0)
 
@@ -972,10 +973,10 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
         self.__run_command("insert_snippet", snippet.dump(allKeys=True))
         self.insertBundleItem(snippet, **kwargs)
         
-    def insertCommand(self, commandScript, commandInput = "none", commandOutput = "insertText", **kwargs):
+    def insertCommand(self, commandScript, commandInput="none", commandOutput="insertText", **kwargs):
         command = self.application().supportManager.buildAdHocCommand(
             commandScript, self.syntax().bundle,
-            commandInput=commandInput, commandOutput=commandOutput)
+            c_input=commandInput, c_output=commandOutput)
         self.insertBundleItem(command, **kwargs)
 
     def environmentVariables(self):
@@ -1203,15 +1204,18 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
 
     # --------------- Menus
     # Flat Popup Menu
-    def showFlatPopupMenu(self, menuItems, callback, cursorPosition = True):
+    def showFlatPopupMenu(self, items, callback, cursorPosition = True):
         menu = QtWidgets.QMenu(self)
-        for index, item in enumerate(menuItems, 1):
+        for index, item in enumerate(items, 1):
             if isinstance(item, dict):
                 title = "%s 	&%d" % (item["title"], index)
                 icon = self.resources().get_icon(item["image"]) if "image" in item else QtGui.QIcon()
             elif isinstance(item,  BundleItemTreeNode):
                 title = "%s 	&%d" % (item.buildMenuTextEntry(False), index)
                 icon = item.icon()
+            elif isinstance(item,  BundleItem):
+                title = "%s 	&%d" % (item.name, index)
+                icon = self.resources().get_icon("bundle-item-%s" % item.type())
             else:
                 title = "%s 	&%d" % (item, index)
                 icon = QtGui.QIcon()
