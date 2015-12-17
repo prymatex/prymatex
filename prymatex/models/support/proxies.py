@@ -30,8 +30,8 @@ class BundleItemProxyTreeModel(QtCore.QSortFilterProxyModel):
             if item.type() not in self.sort_filter_order:
                 return False
         regexp = self.filterRegExp()
-        if not (regexp.isEmpty() or node.type() == "bundle"):
-            return regexp.indexIn(node.name) != -1
+        if not (regexp.isEmpty() or item.type() == "bundle"):
+            return regexp.indexIn(item.name) != -1
         return True
         
     def filterAcceptsColumn(self, sourceColumn, sourceParent):

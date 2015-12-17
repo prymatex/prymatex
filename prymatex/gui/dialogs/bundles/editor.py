@@ -216,7 +216,7 @@ class BundleEditorDialog(PrymatexDialog, Ui_BundleEditorDialog, QtWidgets.QDialo
         
         def conditionalEnabledStaticFile():
             node = self.proxyTreeModel.node(self.treeView.currentIndex())
-            self.staticFileAction.setEnabled(not node.isRootNode() and (node.type() in ["template", "staticfile", "project"]))
+            self.staticFileAction.setEnabled(not node.isRootNode() and (node.type() in ("template", "staticfile", "project")))
         self.toolbarMenu.aboutToShow.connect(conditionalEnabledStaticFile)
         
         self.pushButtonAdd.setMenu(self.toolbarMenu)

@@ -85,7 +85,7 @@ class StatusMixin(object):
     def on_comboBoxSyntaxes_activated(self, index):
         model = self.comboBoxSyntaxes.model()
         node = model.node(model.index(index))
-        self.window().currentEditor().insertBundleItem(node)
+        self.window().currentEditor().insertBundleItem(node.bundleItem())
 
     # -------------- Editor signals
     @QtCore.Slot()
