@@ -57,42 +57,40 @@ def _keyboard_layout_keys(key):
 """
 def keysequence_to_keyequivalent(sequence):
     nemonic = []
-    if sequence & QtCore.Qt.CTRL:
-        nemonic.append("^")
-    if sequence & QtCore.Qt.ALT:
-        nemonic.append("~")
-    if sequence & QtCore.Qt.SHIFT:
-        nemonic.append("$")
-    if sequence & QtCore.Qt.META:
-        nemonic.append("@")
-    key = chr(sequence & 0xFFFF)
-    # TODO Refactorizar esto que es un asco
-    if key in string.ascii_uppercase and "$" in nemonic:
-        nemonic.remove("$")
-        nemonic.append(key)
-        return "".join(nemonic)
-    elif key in string.ascii_uppercase and "$" not in nemonic:
-        nemonic.append(key.lower())
-        return "".join(nemonic)
-    elif "$" not in nemonic:
-        for orig, qtcode in QTCHARCODES.items():
-            if sequence & qtcode == qtcode:
-                key = chr(orig)
-        nemonic.append(key)
-        return "".join(nemonic)
-    else:
-        #Seguro que apreto shift
-        shift, code = _keyboard_layout_keys(key)
-        if shift:
-            nemonic.remove("$")
-            nemonic.append(key)
-            return "".join(nemonic)
-        else:
+    for key in sequence:
+        seq = []
+        if key & QtCore.Qt.CTRL:
+            seq.append("^")
+        if key & QtCore.Qt.ALT:
+            seq.append("~")
+        if key & QtCore.Qt.SHIFT:
+            seq.append("$")
+        if key & QtCore.Qt.META:
+            seq.append("@")
+        seq.append(chr(key & 0xFFFF))
+        if seq[-1] in string.ascii_uppercase and "$" in seq:
+            seq.remove("$")
+            nemonic.append("".join(seq))
+        elif seq[-1] in string.ascii_uppercase and "$" not in seq:
+            seq[-1] = seq[-1].lower()
+            nemonic.append("".join(seq))
+        elif "$" not in seq:
             for orig, qtcode in QTCHARCODES.items():
-                if sequence & qtcode == qtcode:
-                    key = chr(orig)
-            nemonic.append(key)
-            return "".join(nemonic)
+                if key & qtcode == qtcode:
+                    seq[-1] = chr(orig)
+            nemonic.append("".join(seq))
+        else:
+            #Seguro que apreto shift
+            shift, code = _keyboard_layout_keys(key)
+            if shift:
+                seq.remove("$")
+                nemonic.append("".join(seq))
+            else:
+                for orig, qtcode in QTCHARCODES.items():
+                    if key & qtcode == qtcode:
+                        seq[-1] = chr(orig)
+                nemonic.append("".join(seq))
+    return ", ".join(nemonic)
 
 def _keyboard_layout_qtkeys(character):
     keys = []

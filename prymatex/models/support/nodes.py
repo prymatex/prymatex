@@ -26,11 +26,12 @@ class BundleItemTreeNode(TreeNodeBase):
     def bundleItem(self):
         return self.__bundleItem
 
+    @property
     def uuid(self):
-        return self.__bundleItem.uuidAsText()
+        return self.__bundleItem.uuid
 
-    def __hash__(self):
-        return hash(self.uuid())
+    def uuidAsText(self):
+        return self.__bundleItem.uuidAsText()
 
     def keySequence(self):
         if hasattr(self.__bundleItem, "keyEquivalent") and isinstance(self.__bundleItem.keyEquivalent, six.string_types):

@@ -28,14 +28,17 @@ class CodeEditorEditMode(CodeEditorBaseMode):
 
         # Bundle items 
         sequence = keyevent_to_keysequence(event)
+        print(sequence.toString())
         if sequence in self.application().supportManager.getAllKeySequences():
-            yield self.__insert_key_bundle_item
+            yield lambda event, sequence=sequence: \
+                self.__insert_key_bundle_item(event, sequence)
 
         # Pairs
         settings = self.editor.currentPreferenceSettings()
         character = event.text()
         if any((pair for pair in settings.smartTypingPairs if character in pair)):
-            yield self.__insert_typing_pairs
+            yield lambda event, settings=settings, character=character: \
+                self.__insert_typing_pairs(event, settings, character)
 
         #if event.text():
         #    self.editor.runCommand("insert", characters=event.text())
@@ -45,11 +48,11 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         self.editor.runCommand("insert", characters = '\n')
         return True
     
-    def __insert_key_bundle_item(self, event):
-        trigger = keyevent_to_keysequence(event)
+    def __insert_key_bundle_item(self, event, sequence):
         leftScope, rightScope = self.editor.scope(self.editor.textCursor())
-        items = self.application().supportManager.getKeyEquivalentItem(
-            trigger, leftScope, rightScope)
+        items = self.application().supportManager.getKeySequenceItem(
+            sequence, leftScope, rightScope)
+        return False
         self.editor.insertBundleItem(items)
         return bool(items)
     
@@ -94,9 +97,7 @@ class CodeEditorEditMode(CodeEditorBaseMode):
         self.editor.runCommand("right_delete")
         return True
         
-    def __insert_typing_pairs(self, event):
-        settings = self.editor.currentPreferenceSettings()
-        character = event.text()
+    def __insert_typing_pairs(self, event, settings, character):
         pair = [pair for pair in settings.smartTypingPairs if character in pair][0]
 
         cursor = self.editor.textCursor()

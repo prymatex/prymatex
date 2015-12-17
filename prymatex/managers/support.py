@@ -9,7 +9,7 @@ import uuid as uuidmodule
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
 from prymatex.qt.helpers import rgba2color
-from prymatex.qt.helpers import keyequivalent_to_keysequence
+from prymatex.qt.helpers import keyequivalent_to_keysequence, keysequence_to_keyequivalent
 
 from prymatex.core import PrymatexComponent
 from prymatex.core.settings import ConfigurableItem
@@ -84,10 +84,10 @@ class BundleItemMenuGroup(QtCore.QObject):
         menu.menuAction().setVisible(item.enabled() and item.mainMenu is not None)
         # Primero agregarlo a los containers porque estos usan self.menus para ordenar
         self.addToContainers(menu)
-        self.menus[node.uuid()] = menu
+        self.menus[node.uuid] = menu
 
     def menuForBundle(self, bundle):
-        return self.menus.get(bundle.uuid())
+        return self.menus.get(bundle.uuid)
 
     def addToContainers(self, menu):
         currentTitles = sorted([menu.title().replace("&","").lower() for menu in list(self.menus.values())])
@@ -117,7 +117,7 @@ class BundleItemMenuGroup(QtCore.QObject):
                 action.setText(text)
                 
     def on_manager_bundleChanged(self, bundle):
-        menu = self.menus[bundle.uuid()]
+        menu = self.menus[bundle.uuid]
         title = bundle.buildBundleAccelerator()
         if title != menu.title():
             self.removeFromContainers(menu)
@@ -138,7 +138,7 @@ class BundleItemMenuGroup(QtCore.QObject):
         self.addBundle(bundle)
 
     def on_manager_bundlePopulated(self, bundle):
-        menu = self.menus[bundle.uuid()]
+        menu = self.menus[bundle.uuid]
         menu.clear()
         if bundle.bundleItem().mainMenu is not None:
             self.buildMenu(
@@ -146,7 +146,7 @@ class BundleItemMenuGroup(QtCore.QObject):
                 bundle.bundleItem().mainMenu.get('submenus', {}), menu)
 
     def on_manager_bundleRemoved(self, bundle):
-        self.removeFromContainers(self.menus[bundle.uuid()])
+        self.removeFromContainers(self.menus[bundle.uuid])
 
 class Properties(QtCore.QObject):
     def __init__(self, properties):
@@ -521,6 +521,11 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
     def getAllKeySequences(self):
         return [ keyequivalent_to_keysequence(mnemonic) for mnemonic in self.getAllKeyEquivalentMnemonic() ]
 
+    def getKeySequenceItem(self, sequence, left_scope, right_scope):
+        print(sequence, left_scope, right_scope)
+        print(sequence.toString(), keysequence_to_keyequivalent(sequence))
+        return self.getKeyEquivalentItem(keysequence_to_keyequivalent(sequence), left_scope, right_scope)
+        
     # THEME STYLE INTERFACE
     def getThemeStyleNode(self, uuid):
         indexes = self.themeStylesTableModel.match(self.bundleModel.index(0, 0, QtCore.QModelIndex()),

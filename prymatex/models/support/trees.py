@@ -44,7 +44,7 @@ class BundleTreeModel(AbstractTreeModel):
             return node.icon()
         elif role == QtCore.Qt.UUIDRole:
             node = self.node(index)
-            return node.uuid()
+            return node.uuidAsText()
 
     def flags(self, index):
         if not index.isValid():  
