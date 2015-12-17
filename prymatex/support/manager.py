@@ -925,7 +925,7 @@ class SupportBaseManager(object):
 
     def getAllBundleItemsByKeyEquivalent(self, key_equivalent):
         """Return a list of key equivalent bundle items"""
-        return [ item for item in self.getAllTabTriggerItems() if item.keyEquivalent == key_equivalent ]
+        return [ item for item in self.getAllKeyEquivalentItems() if set(item.keyEquivalent) == set(key_equivalent) ]
 
     #-------------- KEYEQUIVALENT ------------------------
     def getAllKeyEquivalentMnemonic(self):
