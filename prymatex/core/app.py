@@ -157,6 +157,7 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
         
         # Populate application's class
         app.populateComponentClass(PrymatexApplication)
+        app.populateComponentClass(PrymatexMainWindow)
 
         # Build more Managers
         app.packageManager = app.createComponentInstance(PackageManager, parent=app)        
@@ -541,8 +542,6 @@ class PrymatexApplication(PrymatexComponent, QtWidgets.QApplication):
 
     def createMainWindow(self, editor=False):
         """Creates the windows"""
-        from prymatex.gui.main import PrymatexMainWindow
-
         window = self.createComponentInstance(PrymatexMainWindow)
         self.windowCreated.emit(window)
         if editor:
