@@ -390,10 +390,7 @@ class SupportManager(PrymatexComponent, SupportBaseManager, QtCore.QObject):
         if isinstance(uuid, uuidmodule.UUID):
             uuid = self.uuidtotext(uuid)
         if not self.isDeleted(uuid):
-            indexes = self.bundleModel.match(self.bundleModel.index(0, 0, QtCore.QModelIndex()), 
-                QtCore.Qt.UUIDRole, uuid, 1, QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive)
-            if indexes:
-                return self.bundleModel.node(indexes[0])
+            return self.bundleModel.findNode(QtCore.Qt.UUIDRole, uuid)
 
     # -------------------- BUNDLE INTERFACE 
     def onBundleAdded(self, bundle):

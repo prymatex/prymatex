@@ -41,10 +41,9 @@ class EditorSettingsWidget(SettingsTreeNode, Ui_Editor, QtWidgets.QWidget):
 
         syntax_uuid = self.settings().get('default_syntax')
         if syntax_uuid is not None:
-            default_syntax = self.application().supportManager.getBundleItem(syntax_uuid)
-            index = self.comboBoxDefaultSyntax.model().nodeIndex(default_syntax).row()
-            if index:
-                self.comboBoxDefaultSyntax.setCurrentIndex(index)
+            node = self.application().supportManager.getManagedObjectNode(syntax_uuid)
+            index = self.comboBoxDefaultSyntax.model().indexFromNode(node)
+            self.comboBoxDefaultSyntax.setCurrentIndex(index.row())
 
         # Flags
         flags = int(self.settings().get('default_flags'))

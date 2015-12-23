@@ -76,7 +76,9 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         self.application().showMessage(message)
 
     def updateUi(self, theme):
-        self.comboBoxThemes.setCurrentIndex(self.comboBoxThemes.model().nodeIndex(theme).row())    
+        node = self.application().supportManager.getManagedObjectNode(theme.uuid)
+        index = self.comboBoxThemes.model().indexFromNode(node)
+        self.comboBoxThemes.setCurrentIndex(index.row())
         palette = self.application().supportManager.getThemePalette(theme)
         # Filter theme proxy model
         self.application().supportManager.themeStyleProxyModel.setFilterRegExp(theme.uuidAsText())

@@ -54,8 +54,9 @@ class StatusMixin(object):
     # -------------- Syntax tool
     def _update_syntax(self, editor):
         model = self.comboBoxSyntaxes.model()
-        index = model.nodeIndex(editor.syntax()).row()
-        self.comboBoxSyntaxes.setCurrentIndex(index)
+        node = model.findNode(QtCore.Qt.UUIDRole, editor.syntax().uuidAsText())
+        index = model.indexFromNode(node)
+        self.comboBoxSyntaxes.setCurrentIndex(index.row())
         
     def on_labelContent_customContextMenuRequested(self, point):
         #Setup Context Menu

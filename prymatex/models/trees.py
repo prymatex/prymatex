@@ -97,7 +97,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
             return QtCore.QModelIndex()
         return self.createIndex(parentNode.row(), parentNode.column(), parentNode)
     
-    def nodeIndex(self, node):
+    def indexFromNode(self, node):
         if node.isRootNode():
             return self.createIndex(0, 0, node)
         else:
@@ -117,6 +117,16 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
             return nodes
         return _collect(self.rootNode)
 
+    def findNodes(self, role, value, hits=-1, flags=QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive):
+        return [ self.node(index) for index in 
+            self.match(self.index(0, 0, QtCore.QModelIndex()), 
+                role, value, hits, flags) ]
+
+    def findNode(self, role, value, flags=QtCore.Qt.MatchFixedString | QtCore.Qt.MatchRecursive):
+        nodes = self.findNodes(role, value, 1)
+        if nodes:
+            return nodes[0]
+
     def clear(self):
         self.rootNode.removeAllChildren()
         self.layoutChanged.emit()
@@ -124,7 +134,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
     def appendNode(self, node, parentNode=None):
         # TODO: validar y retornar falso si no se puede, ver si el parent puede ser index y node
         parentNode = parentNode or self.rootNode
-        parentIndex = self.nodeIndex(parentNode)
+        parentIndex = self.indexFromNode(parentNode)
         self.beginInsertRows(parentIndex, parentNode.childrenCount(), parentNode.childrenCount())
         parentNode.appendChild(node)
         self.endInsertRows()
@@ -133,7 +143,7 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
     def removeNode(self, node, parentNode=None):
         # TODO: validar y retornar falso si no se puede, ver si el parent puede ser index y node
         parentNode = parentNode or self.rootNode
-        parentIndex = self.nodeIndex(parentNode)
+        parentIndex = self.indexFromNode(parentNode)
         self.beginRemoveRows(parentIndex, node.row(), node.row())
         parentNode.removeChild(node)
         self.endRemoveRows()
@@ -167,7 +177,7 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
 
     def insertNamespaceNode(self, namespace, node):
         parentNode = self.nodeForNamespace(namespace, True)
-        parentIndex = self.nodeIndex(parentNode)
+        parentIndex = self.indexFromNode(parentNode)
         #Check if exit proxy for setting
         proxy = parentNode.findChildByName(node.nodeName())
         if proxy != None:
@@ -212,12 +222,14 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
         #El root node no puede estar en un flat proxy porque sino no es flat
         if not node.isRootNode():
             return node
-        
-    def nodeIndex(self, node):
-        for num, index in enumerate(self.__indexMap):
-            if self.sourceModel().node(index) == node:
-                return self.index(num)
-        return QtCore.QModelIndex()
+    
+    def findNode(self, role, value):
+        #TODO: Solo si tiene source model y el nodo esta dentro del proxy
+        return self.sourceModel().findNode(role, value)
+    
+    def indexFromNode(self, node):
+        source_index = self.sourceModel().indexFromNode(node)
+        return self.mapFromSource(source_index)
 
     def nodes(self):
         return [self.sourceModel().node(index) for index in self.__indexMap]
@@ -229,10 +241,14 @@ class FlatTreeProxyModel(QtCore.QAbstractItemModel):
         return True
     
     def mapToSource(self, index):
-        return self.__indexMap[index.row()]
+        if index.isValid():
+            return self.__indexMap[index.row()]
+        return QtCore.QModelIndex()
 
     def mapFromSource(self, index):
-        return self.index(self.__indexMap.index(index))
+        if index in self.__indexMap:
+            return self.index(self.__indexMap.index(index))
+        return QtCore.QModelIndex()
             
     def columnCount(self, parent):
         return 1
