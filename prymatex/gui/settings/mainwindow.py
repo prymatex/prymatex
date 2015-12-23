@@ -14,7 +14,6 @@ class MainWindowSettingsWidget(SettingsTreeNode, Ui_MainWindow, QtWidgets.QWidge
         self.setupUi(self)
 
     def loadSettings(self):
-        print("arranca window settings")
         super(MainWindowSettingsWidget, self).loadSettings()
         self.setTitle("Main Window")
         self.setIcon(self.application().resources().get_icon("settings-main-window"))
