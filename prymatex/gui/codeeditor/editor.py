@@ -888,8 +888,10 @@ class CodeEditor(PrymatexEditor, CodeEditorCommandsMixin, TextEditWidget):
     # OVERRIDE: TextEditWidget.keyPressEvent()
     def keyPressEvent(self, event):
         #Emula el comportamiento del comando insert
-        if event.text():
+        if event.text() and not event.modifiers():
             self.__run_command("insert", {'characters': event.text()})
+        elif event.matches(QtGui.QKeySequence.Paste):
+            self.__run_command("paste", {})
         if not any(self._handle_event(self.keyPress_handlers(event), event)):
             super(CodeEditor, self).keyPressEvent(event)
             self.keyPressed.emit(event)
