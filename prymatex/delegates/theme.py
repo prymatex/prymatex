@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from prymatex.qt import QtCore, QtGui, QtWidgets
+from prymatex.qt.helpers import widgets
 
 class ColorDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, options, index):
         editor = QtWidgets.QColorDialog(parent)
         editor.setOptions(QtWidgets.QColorDialog.ShowAlphaChannel)
+        widgets.center_widget(editor)
         return editor
 
     def setModelData(self, editedWidget, model, index):
@@ -23,12 +25,6 @@ class ColorDelegate(QtWidgets.QStyledItemDelegate):
         data = index.data()
         if isinstance(data, QtGui.QColor):
             painter.save()
-            #Con un pixmap lindo
-            #pixmap = QtGui.QPixmap(16, 16)
-            #pixmap.fill(data)
-            #painter.translate(option.rect.topLeft())
-            #painter.drawPixmap(0, 0, pixmap)
-            #Pintando todo
             brush = QtGui.QBrush(data)
             painter.fillRect(option.rect, brush)
             painter.restore()
@@ -69,7 +65,8 @@ class FontStyleDelegate(QtWidgets.QStyledItemDelegate):
     
     def createEditor(self, parent, option, index):
         dialog = QtWidgets.QDialog(parent)
-        dialog.setLayout(self.buildFontLayout(index, dialog))      
+        dialog.setLayout(self.buildFontLayout(index, dialog))
+        widgets.center_widget(dialog)      
         return dialog
         
     def setModelData(self, editedWidget, model, index):
