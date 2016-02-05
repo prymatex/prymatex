@@ -690,7 +690,7 @@ class SupportBaseManager(object):
     def onThemeAdded(self, theme):
         pass
 
-    def removeTheme(self, theme):
+    def onThemeRemoved(self, theme):
         pass
 
     # ------------ THEME CRUD
@@ -712,7 +712,7 @@ class SupportBaseManager(object):
     def onStaticFileAdded(self, file):
         pass
 
-    def removeStaticFile(self, file):
+    def onStaticFileRemoved(self, file):
         pass
 
     # -------------- STATICFILE CRUD
@@ -757,8 +757,11 @@ class SupportBaseManager(object):
 
     def onThemeStyleAdded(self, style):
         pass
+        
+    def onThemeStyleModified(self, style):
+        pass
 
-    def removeThemeStyle(self, style):
+    def onThemeStyleRemoved(self, style):
         pass
 
     # ------------ THEMESTYLE CRUD
@@ -766,34 +769,46 @@ class SupportBaseManager(object):
         namespace = self.namespace(ns_name)
         assert namespace is not None, "No namespace for %s" % ns_name
         
-        theme = self.ensureBundleItemIsSafe(theme, namespace)
+        base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
+        self.ensureManagedObjectIsSafe(theme.bundle, ns_name, base)
+        bundle_source = theme.bundle.currentSource()
+        self.ensureManagedObjectIsSafe(theme, ns_name, bundle_source.path)
         
         style = theme.createThemeStyle(attrs)
 
         # Do update and save
-        self.saveManagedObject(theme, namespace)
+        self.saveManagedObject(theme, theme.currentSource())
+        self.onThemeStyleAdded(style)
         return style
 
     def updateThemeStyle(self, style, ns_name=config.USR_NS_NAME, **attrs):
         namespace = self.namespace(ns_name)
         assert namespace is not None, "No namespace for %s" % ns_name
         
-        theme = self.ensureBundleItemIsSafe(style.theme, namespace)
-        
+        theme = style.theme
+        base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
+        self.ensureManagedObjectIsSafe(theme.bundle, ns_name, base)
+        bundle_source = theme.bundle.currentSource()
+        self.ensureManagedObjectIsSafe(theme, ns_name, bundle_source.path)
+
         # Do update and save
         style.update(attrs)
-        self.saveManagedObject(theme, namespace)
-        self.onBundleItemModified(theme)
+        self.saveManagedObject(theme, theme.currentSource())
+        self.onThemeStyleModified(style)
         return style
 
     def deleteThemeStyle(self, style, ns_name=config.USR_NS_NAME):
         namespace = self.namespace(ns_name)
         assert namespace is not None, "No namespace for %s" % ns_name
-        
-        theme = self.ensureBundleItemIsSafe(style.theme, namespace)
+
+        theme = style.theme        
+        base = os.path.join(namespace.path, config.PMX_BUNDLES_NAME)
+        self.ensureManagedObjectIsSafe(theme.bundle, ns_name, base)
+        bundle_source = theme.bundle.currentSource()
+        self.ensureManagedObjectIsSafe(theme, ns_name, bundle_source.path)
         theme.removeThemeStyle(style)
-        self.saveManagedObject(theme, namespace)
-        self.removeThemeStyle(style)
+        self.saveManagedObject(theme, theme.currentSource())
+        self.onThemeStyleRemoved(style)
 
     # ----------- PREFERENCES INTERFACE
     def getAllPreferences(self):

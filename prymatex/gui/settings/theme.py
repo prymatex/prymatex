@@ -112,15 +112,17 @@ class ThemeSettingsWidget(SettingsTreeNode, Ui_FontTheme, QtWidgets.QWidget):
         self.comboBoxScope.editTextChanged.connect(self.on_comboBoxScope_changed)
 
     def on_tableView_activatedOrPressed(self, index):
-        style = self.application().supportManager.themeStyleProxyModel.style(index)
+        item = self.application().supportManager.themeStyleProxyModel.style(index)
+        style = item.styleItem()
         self.comboBoxScope.setEditText(style.scope)
 
-    def on_comboBoxScope_changed(self, scopeText):
+    def on_comboBoxScope_changed(self, text):
         index = self.tableViewStyles.currentIndex()
         if index.isValid():
-            style = self.application().supportManager.themeStyleProxyModel.style(index)
-            if scopeText != style.scope:
-                self.application().supportManager.updateThemeStyle(style, scope = scopeText)
+            item = self.application().supportManager.themeStyleProxyModel.style(index)
+            style = item.styleItem()
+            if text != style.scope:
+                self.application().supportManager.updateThemeStyle(style, scope=text)
 
     def on_pushButtonAdd_pressed(self):
         theme = self.comboBoxThemes.model().node(self.comboBoxThemes.currentIndex())
