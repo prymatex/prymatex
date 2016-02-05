@@ -24,39 +24,39 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
         if not index.isValid(): 
             return QtCore.QVariant() 
         column = index.column()
-        style = self.styles[index.row()]
-        settings = style.settings()
+        item = self.styles[index.row()]
+        style = item.styleItem()
         if role in [ QtCore.Qt.DisplayRole, QtCore.Qt.EditRole ]:
             if column == 0:
-                return style.styleItem().name
-            elif column == 1 and 'foreground' in settings:
-                return settings['foreground']
-            elif column == 2 and 'background' in settings:
-                return settings['background']
-            elif column == 3 and 'fontStyle' in settings:
-                return settings['fontStyle']
-        elif role == QtCore.Qt.FontRole and 'fontStyle' in settings:
+                return style.name
+            elif column == 1:
+                return item.foreground()
+            elif column == 2:
+                return item.background()
+            elif column == 3:
+                return item.fontStyle()
+        elif role == QtCore.Qt.FontRole:
             if column == 0:
                 font = QtGui.QFont()
-                if 'bold' in settings['fontStyle']:
+                if 'bold' in item.fontStyle():
                     font.setBold(True)
-                if 'underline' in settings['fontStyle']:
+                if 'underline' in item.fontStyle():
                     font.setUnderline(True)
-                if 'italic' in settings['fontStyle']:
+                if 'italic' in item.fontStyle():
                     font.setItalic(True)
                 return font
         elif role is QtCore.Qt.ForegroundRole:
-            if column == 0 and 'foreground' in settings:
-                return settings['foreground']
+            if column == 0:
+                return item.foreground()
         elif role is QtCore.Qt.BackgroundColorRole:
-            if column == 0 and 'background' in settings:
-                return settings['background']
-            elif column == 1 and 'foreground' in settings:
-                return settings['foreground']
-            elif column == 2 and 'background' in settings:
-                return settings['background']
+            if column == 0:
+                return item.background()
+            elif column == 1:
+                return item.foreground()
+            elif column == 2:
+                return item.background()
         elif role is QtCore.Qt.UUIDRole:
-            return style.uuid()
+            return style.uuidAsText()
 
     def setData(self, index, value, role):
         """Retornar verdadero si se puedo hacer el camio, falso en caso contratio"""
@@ -65,15 +65,16 @@ class ThemeStylesTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.EditRole:
             row = index.row()
             column = index.column()
-            style = self.styles[row]
+            item = self.styles[row]
+            style = item.styleItem()
             if column == 0:
-                self.manager.updateThemeStyle(style, name = value)
+                self.manager.updateThemeStyle(style, name=value)
             elif column == 1:
-                self.manager.updateThemeStyle(style, settings = {'foreground' : value })
+                self.manager.updateThemeStyle(style, settings={'foreground':value })
             elif column == 2:
-                self.manager.updateThemeStyle(style, settings = {'background' : value })
+                self.manager.updateThemeStyle(style, settings={'background':value })
             elif column == 3:
-                self.manager.updateThemeStyle(style, settings = {'fontStyle' : value })
+                self.manager.updateThemeStyle(style, settings={'fontStyle':" ".join(value) })
             self.dataChanged.emit(index, index)
             return True
         return False

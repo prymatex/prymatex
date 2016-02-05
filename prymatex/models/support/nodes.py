@@ -144,35 +144,30 @@ class ThemeStyleTableRow(object):
     """Theme and Style decorator"""
     def __init__(self, styleItem):
         self.__styleItem = styleItem
-        self.__settings = None             # Settings cache
         
     # ----------- Item attrs assessors -----------
     def styleItem(self):
         return self.__styleItem
 
-    def uuid(self):
-        return self.__styleItem.uuidAsText()
-
-    # ----------- Style decorator -----------
     @property
-    def scopeSelector(self):
-        return self.__styleItem.scopeSelector
+    def uuid(self):
+        return self.__bundleItem.uuid
 
-    def load(self, *args, **kwargs):
-        return self.__styleItem.load(*args, **kwargs)
+    def uuidAsText(self):
+        return self.__bundleItem.uuidAsText()
 
     # ----------- Item decoration -----------
-    def settings(self):
-        if self.__settings is None:
-            # Build cache
-            self.__settings = {}
-            for key, value in self.__styleItem.settings().items():
-                if value.startswith('#'):
-                    self.__settings[key] = rgba2color(value)
-                if key == 'fontStyle':
-                    self.__settings[key] = value.split()
-        return self.__settings
-    
+    def background(self):
+        rgba=self.__styleItem.settings().get("background", "")
+        return rgba and rgba2color(rgba)
+        
+    def foreground(self):
+        rgba=self.__styleItem.settings().get("foreground", "")
+        return rgba and rgba2color(rgba)
+        
+    def fontStyle(self):
+        return self.__styleItem.settings().get("fontStyle", "").split()
+
     def update(self, dataHash):
         self.__settings = None              # Clean cache
         settings = {}
