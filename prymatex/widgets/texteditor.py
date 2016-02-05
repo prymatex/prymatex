@@ -58,6 +58,9 @@ class CompletionWidget(QtWidgets.QListWidget):
 
         hashes = set()
         for comp, txt, mt, ico, tip in self._map_completions(completions):
+            _hash = hash(mt)
+            if _hash in self._match_hashes:
+                continue
             item = QtWidgets.QListWidgetItem(txt, self)
             item.setData(QtCore.Qt.MatchRole, mt)
             if ico is not None:
