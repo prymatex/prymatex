@@ -112,3 +112,6 @@
 [submodule "prymatex/share/Packages/Python"]
 	path = prymatex/share/Packages/Python
 	url = git@github.com:prymatex/Python.git
+[submodule "prymatex/share/Bundles/coffee-script.tmbundle"]
+	path = prymatex/share/Bundles/coffee-script.tmbundle
+	url = git@github.com:prymatex/coffee-script.tmbundle
