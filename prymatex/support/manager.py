@@ -5,6 +5,7 @@ import re
 import os
 import string
 import shutil
+import logging
 import uuid as uuidmodule
 import subprocess
 from functools import reduce
@@ -22,6 +23,8 @@ from . import bundleitem
 from . import scope
 from .staticfile import StaticFile
 from .process import RunningContext
+
+logger = logging.getLogger(__name__)
 
 # ------- Tool function for compare bundle items by attributes
 def compare(obj, keys, tests):
@@ -234,22 +237,27 @@ class SupportBaseManager(object):
         for path in Bundle.sourcePaths(base):
             bundle_source = source.Source(namespace.name, path)
             bundle = self.loadBundle(bundle_source)
-            loaded.add(bundle)
+            if bundle:
+                loaded.add(bundle)
         return loaded
 
     def loadBundle(self, source):
-        data = self.readPlist(Bundle.dataFilePath(source.path))
-        uuid = self.uuidgen(data.get('uuid'))
-        bundle = self.getManagedObject(uuid)
-        if bundle is None:
-            bundle = Bundle(uuid, self)
-            bundle.load(data)
-            self.addManagedObject(bundle)
-            self.onBundleAdded(bundle)
+        file_path = Bundle.dataFilePath(source.path)
+        if os.path.isfile(file_path):
+            data = self.readPlist(file_path)
+            uuid = self.uuidgen(data.get('uuid'))
+            bundle = self.getManagedObject(uuid)
+            if not bundle:
+                bundle = Bundle(uuid, self)
+                bundle.load(data)
+                self.addManagedObject(bundle)
+                self.onBundleAdded(bundle)
+            else:
+                bundle.load(data)
+            bundle.addSource(source)
+            return bundle
         else:
-            bundle.load(data)
-        bundle.addSource(source)
-        return bundle
+            logger.warn("File does not exist: %s" % file_path)
 
     # ----------- POPULATE BUNDLE AND LOAD BUNDLE ITEMS
     def populateBundle(self, bundle):
@@ -261,44 +269,48 @@ class SupportBaseManager(object):
                 base = bundle.sourcePath(namespace.name)
                 for path in klass.sourcePaths(base):
                     item_source = source.Source(namespace.name, path)
-                    bundleItem = self.loadBundleItem(klass, item_source, bundle)
+                    self.loadBundleItem(klass, item_source, bundle)
         bundle.setPopulated(True)
         self.onBundlePopulated(bundle)
 
     def loadBundleItem(self, klass, source, bundle):
-        data = self.readPlist(klass.dataFilePath(source.path))
-        uuid = self.uuidgen(data.get('uuid'))
-        bundleItem = self.getManagedObject(uuid)
-        if bundleItem is None:
-            bundleItem = klass(uuid, self, bundle)
-            bundleItem.load(data)
-            self.onBundleItemAdded(bundleItem)
-            for staticPath in klass.staticFilePaths(source.path):
-                # TODO: Ver que hacer con directorios
-                staticFile = StaticFile(staticPath, bundleItem)
-                bundleItem.addStaticFile(staticFile)
-                self.onStaticFileAdded(staticFile)
-            self.addManagedObject(bundleItem)
+        file_path = klass.dataFilePath(source.path)
+        if os.path.isfile(file_path):
+            data = self.readPlist(file_path)
+            uuid = self.uuidgen(data.get('uuid'))
+            bundle_item = self.getManagedObject(uuid)
+            if not bundle_item:
+                bundle_item = klass(uuid, self, bundle)
+                bundle_item.load(data)
+                self.onBundleItemAdded(bundle_item)
+                for staticPath in klass.staticFilePaths(source.path):
+                    # TODO: Ver que hacer con directorios
+                    staticFile = StaticFile(staticPath, bundle_item)
+                    bundle_item.addStaticFile(staticFile)
+                    self.onStaticFileAdded(staticFile)
+                self.addManagedObject(bundle_item)
+            else:
+                bundle_item.load(data)
+            bundle_item.addSource(source)
+            return bundle_item
         else:
-            bundleItem.load(data)
-        bundleItem.addSource(source)
-        return bundleItem
+            logger.warn("File does not exist: %s" % file_path)
 
     # -------------------- RELOAD SUPPORT
     def reloadSupport(self, message_handler = None):
         # Reload Implica ver en todos los espacios de nombre instalados por cambios en los items
         # Install message handler
         self.message_handler = message_handler
-        self.logger().debug("Begin reload support.")
+        logger.debug("Begin reload support.")
         for namespace in self.namespaces():
-            self.logger().debug("Search in %s, %s." % (namespace.name, os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
+            logger.debug("Search in %s, %s." % (namespace.name, os.path.join(namespace.path, config.PMX_BUNDLES_NAME)))
             self.reloadBundles(namespace)
         for bundle in self.getAllBundles():
             if bundle.enabled():
                 self.repopulateBundle(bundle)
         # Uninstall message handler
         self.message_handler = None
-        self.logger().debug("End reload support.")
+        logger.debug("End reload support.")
 
     # ---------------- RELOAD BUNDLES
     def reloadBundles(self, namespace):
@@ -319,7 +331,7 @@ class SupportBaseManager(object):
                     item.removeSource(namespace.name)
                 bundle.removeSource(namespace.name)
                 if not bundle.hasSources():
-                    self.logger().debug("Bundle %s removed." % bundle.name)
+                    logger.debug("Bundle %s removed." % bundle.name)
                     for item in bundleItems:
                         self.removeManagedObject(item)
                         self.onBundleItemRemoved(item)
@@ -331,7 +343,7 @@ class SupportBaseManager(object):
                     bundle.setSupportPath(None)
                     bundle.setDirty()
         for path in paths_to_find:
-            self.logger().debug("New bundle %s." % path)
+            logger.debug("New bundle %s." % path)
             bundle_source = source.Source(namespace.name, path)
             bundle = self.loadBundle(bundle_source)
 
@@ -349,14 +361,14 @@ class SupportBaseManager(object):
                 item_source = bundleItem.source(namespace.name)
                 if item_source.path in paths_to_find[bundleItem.type()]:
                     if item_source == bundleItem.currentSource() and item_source.hasChanged():
-                        self.logger().debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, item_source.path))
+                        logger.debug("Bundle Item %s changed, reload from %s." % (bundleItem.name, item_source.path))
                         self.loadBundleItem(self.BUNDLEITEM_CLASSES[bundleItem.type()], item_source, bundle)
                         self.onBundleItemModified(bundleItem)
                     paths_to_find[bundleItem.type()].remove(item_source.path)
                 else:
                     bundleItem.removeSource(namespace.name)
                     if not bundleItem.hasSources():
-                        self.logger().debug("Bundle Item %s removed." % bundleItem.name)
+                        logger.debug("Bundle Item %s removed." % bundleItem.name)
                         self.removeManagedObject(bundleItem)
                         self.onBundleItemRemoved(bundleItem)
                     else:
@@ -365,7 +377,7 @@ class SupportBaseManager(object):
                 klass = self.BUNDLEITEM_CLASSES[itemType]
                 for path in itemPaths:
                     item_source = source.Source(namespace.name, path)
-                    self.logger().debug("New bundle item %s." % path)
+                    logger.debug("New bundle item %s." % path)
                     item = self.loadBundleItem(klass, item_source, bundle)
         self.onBundlePopulated(bundle)
 
@@ -452,7 +464,7 @@ class SupportBaseManager(object):
             obj_source = source.Source(name, obj.createSourcePath(base))
             obj.addSource(obj_source)
             self.saveManagedObject(obj, obj_source)
-            self.logger().debug("Add source '%s' in %s for object." % (name, obj_source.path))
+            logger.debug("Add source '%s' in %s for object." % (name, obj_source.path))
         
     # ------------- BUNDLE INTERFACE
     def getBundle(self, uuid):
@@ -889,7 +901,7 @@ class SupportBaseManager(object):
         return self._properties[directory]
 
     def getPropertiesSettings(self, path=None, leftScope=None, rightScope=None):
-        self.logger().debug("Loading properties for %s" % path)
+        logger.debug("Loading properties for %s" % path)
         properties = self.getProperties(path or config.USER_HOME_PATH)
         return properties.buildSettings(
             path or config.USER_HOME_PATH,
