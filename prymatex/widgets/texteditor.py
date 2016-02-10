@@ -164,7 +164,6 @@ class CompletionWidget(QtWidgets.QListWidget):
             flags = match_flag | QtCore.Qt.MatchWrap
             if match_flag == QtCore.Qt.MatchRegExp:
                 match = QtCore.QRegExp(".*?".join(match))
-                print(match)
             if self._case_sensitive:
                 flags |= QtCore.Qt.MatchCaseSensitive
             self._match_indexes = model.match(model.index(0, 0, QtCore.QModelIndex()),
