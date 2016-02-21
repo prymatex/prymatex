@@ -76,7 +76,7 @@ class CompletionWidget(QtWidgets.QListWidget):
             return
 
         if len(self._completions) == 1 and not automatic:
-            self.__item_activated(self._completions[0])
+            self.__insert_completion(0)
             return
 
         self.resize(self.sizeHint())
@@ -118,7 +118,7 @@ class CompletionWidget(QtWidgets.QListWidget):
         ctrl = event.modifiers() & QtCore.Qt.ControlModifier
         modifier = shift or ctrl or alt
         if key in self.select_keys:
-            self.__item_activated()
+            self.__insert_completion(self.currentRow())
         elif key in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter,
                      QtCore.Qt.Key_Left, QtCore.Qt.Key_Right) or text in ('.', ':'):
             self.hide()
@@ -183,11 +183,11 @@ class CompletionWidget(QtWidgets.QListWidget):
         self.current_match_index = 1 if selfsame else 0
         self.setCurrentRow(self._match_indexes[self.current_match_index].row())
     
-    def __item_activated(self, widget_item=None):
-        row = self.currentRow() if widget_item is None \
-            else self.row(widget_item)
-        completion = self._completions[row]
-        self.textedit.insertCompletion(completion)
+    def __item_activated(self, widget):
+        self.__insert_completion(self.row(widget))
+        
+    def __insert_completion(self, row):
+        self.textedit.insertCompletion(self._completions[row])
         self.hide()
 
     def __item_highlighted(self, index=None):
