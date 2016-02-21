@@ -131,21 +131,21 @@ class AbstractTreeModel(QtCore.QAbstractItemModel):
         self.rootNode.removeAllChildren()
         self.layoutChanged.emit()
     
-    def appendNode(self, node, parentNode=None):
+    def appendNode(self, node, parent_node=None):
         # TODO: validar y retornar falso si no se puede, ver si el parent puede ser index y node
-        parentNode = parentNode or self.rootNode
-        parentIndex = self.indexFromNode(parentNode)
-        self.beginInsertRows(parentIndex, parentNode.childrenCount(), parentNode.childrenCount())
-        parentNode.appendChild(node)
+        parent_node = parent_node or self.rootNode
+        parent_index = self.indexFromNode(parent_node)
+        self.beginInsertRows(parent_index, parent_node.childrenCount(), parent_node.childrenCount())
+        parent_node.appendChild(node)
         self.endInsertRows()
         return True
         
-    def removeNode(self, node, parentNode=None):
+    def removeNode(self, node, parent_node=None):
         # TODO: validar y retornar falso si no se puede, ver si el parent puede ser index y node
-        parentNode = parentNode or self.rootNode
-        parentIndex = self.indexFromNode(parentNode)
-        self.beginRemoveRows(parentIndex, node.row(), node.row())
-        parentNode.removeChild(node)
+        parent_node = parent_node or self.rootNode
+        parent_index = self.indexFromNode(parent_node)
+        self.beginRemoveRows(parent_index, node.row(), node.row())
+        parent_node.removeChild(node)
         self.endRemoveRows()
         return True
         
@@ -177,7 +177,7 @@ class AbstractNamespaceTreeModel(AbstractTreeModel):
 
     def insertNamespaceNode(self, namespace, node):
         parentNode = self.nodeForNamespace(namespace, True)
-        parentIndex = self.indexFromNode(parentNode)
+        parent_inde = self.indexFromNode(parentNode)
         #Check if exit proxy for setting
         proxy = parentNode.findChildByName(node.nodeName())
         if proxy != None:

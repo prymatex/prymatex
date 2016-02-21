@@ -200,9 +200,7 @@ class ProjectManager(PrymatexComponent, QtCore.QObject):
         project.removeNamespace(namespace)
         project.save()
         
-    #---------------------------------------------------
-    # PROJECT INTERFACE
-    #---------------------------------------------------
+    # ----------------------- PROJECT INTERFACE
     def addProject(self, project):
         project.setManager(self)
         # Agregar los namespace folders
