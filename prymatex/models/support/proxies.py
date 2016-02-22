@@ -99,7 +99,7 @@ class BundleListModel(BundleItemTypeListModel):
             return None
         
         if role == QtCore.Qt.CheckStateRole:
-            bundle = self.node(index)
+            node = self.node(index)
             item = node.bundleItem()
             return QtCore.Qt.Checked if item.enabled() else QtCore.Qt.Unchecked
         else:
